@@ -2,6 +2,7 @@ package com.example.listwithanimation
 
 import android.content.Context
 import android.os.Bundle
+import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
@@ -15,6 +16,10 @@ import androidx.recyclerview.widget.SimpleItemAnimator
 import com.example.listwithanimation.adapters.ItemModel
 import com.example.listwithanimation.adapters.MainRecyclerAdapter
 import com.example.listwithanimation.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import kotlin.math.abs
 
 
 class MainActivity : AppCompatActivity() {
@@ -37,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnOk.setOnClickListener {
             binding.cvBottomAddItem.isVisible = false
             hideKeyboard()
-            adapter.addOne(ItemModel(1, null, binding.edtAddName.text.toString(), binding.edtAddDescription.text.toString(), type = 1))
+            addOne(ItemModel(1, null, binding.edtAddName.text.toString(), binding.edtAddDescription.text.toString(), type = 1))
             binding.rvMain.smoothScrollToPosition(0)
         }
         binding.btnCancelMove.setOnClickListener {
@@ -47,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnOkMove.setOnClickListener {
             binding.cvBottomMoveItem.isVisible = false
             hideKeyboard()
-            adapter.move(binding.edtMovePosition.text.toString().toInt(), 0)
+            move(binding.edtMovePosition.text.toString().toInt(), 0)
             binding.rvMain.smoothScrollToPosition(0)
         }
     }
@@ -98,7 +103,7 @@ class MainActivity : AppCompatActivity() {
 
         adapter.onItemClickCallback = {
             if(inRemoveMode && it != -1) {
-                adapter.removeOne(binding.rvMain.findViewHolderForAdapterPosition(it)?.itemView ,it)
+                removeOne(binding.rvMain.findViewHolderForAdapterPosition(it)?.itemView ,it)
             }
         }
         binding.rvMain.adapter = adapter
@@ -124,4 +129,62 @@ class MainActivity : AppCompatActivity() {
             imm?.hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
+
+    fun move(firstPosition: Int, secondPosition: Int) {
+        var count = abs(firstPosition - 1 - secondPosition)
+        while(count > 0) {
+            adapter.getCurrentDataSet().swap( count, count - 1)
+            adapter.notifyItemMoved( count, count - 1)
+            count--
+        }
+        adapter.notifyItemChanged(0)
+//        binding.rvMain.findViewHolderForAdapterPosition(0)?.itemView?.let {
+//            adapter.setAnimation(it, 0)
+//
+//        }
+    }
+    private fun <T> MutableList<T>.swap(index1: Int, index2: Int){
+        val tmp = this[index1]
+        this[index1] = this[index2]
+        this[index2] = tmp
+    }
+    fun removeOne(view: View?, position: Int) {
+
+//        list = differ.currentList.toMutableList()
+//        list.reversed()
+        view?.let {
+//            setRemovalAnimation(it)
+//            it.isVisible = false
+//            Handler().postDelayed({
+            adapter.getCurrentDataSet().removeAt(position)
+//            list.reversed()
+            adapter.notifyItemRemoved(position)
+//            notifyDataSetChanged()
+//            notifyItemRangeChanged(position, list.size)
+//            }, 500)
+            adapter.setRemovalAnimation(it)
+//        differ.submitList(list)
+        }
+    }
+
+    fun addOne(item: ItemModel) {
+//        list = differ.currentList.toMutableList()
+        runBlocking {
+                adapter.getCurrentDataSet().reverse()
+                adapter.getCurrentDataSet().add(item)
+                adapter.getCurrentDataSet().reverse()
+//                withContext(Dispatchers.Main) {
+                    adapter.notifyItemInserted(0)
+//                }
+
+        }
+        binding.rvMain.postDelayed({
+            val view = binding.rvMain.findViewHolderForAdapterPosition(0)
+            if(view != null){
+                adapter.setAnimation(view.itemView)
+            }
+        }, 50)
+//        differ.submitList(list)
+    }
+
 }

@@ -35,45 +35,8 @@ class MainRecyclerAdapter() : RecyclerView.Adapter<ViewHolder>() {
     fun setActivityContext(context: Context) {
         this.context = context
     }
-    fun addOne(item: ItemModel) {
-//        list = differ.currentList.toMutableList()
-        list.reverse()
-        list.add(item)
-        list.reverse()
-        notifyItemInserted(0)
-//        differ.submitList(list)
-    }
-    fun move(firstPosition: Int, secondPosition: Int) {
-        var count = abs(firstPosition - 1 - secondPosition)
-        while(count > 0) {
-            list.swap( count, count - 1)
-            notifyItemMoved( count, count - 1)
-            count--
-        }
-    }
-    private fun <T> MutableList<T>.swap(index1: Int, index2: Int){
-        val tmp = this[index1]
-        this[index1] = this[index2]
-        this[index2] = tmp
-    }
-    fun removeOne(view: View?, position: Int) {
 
-//        list = differ.currentList.toMutableList()
-//        list.reversed()
-        view?.let {
-//            setRemovalAnimation(it)
-//            it.isVisible = false
-//            Handler().postDelayed({
-                list.removeAt(position)
-//            list.reversed()
-                notifyItemRemoved(position)
-//            notifyDataSetChanged()
-//            notifyItemRangeChanged(position, list.size)
-//            }, 500)
-            setRemovalAnimation(it)
-//        differ.submitList(list)
-        }
-    }
+
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): ViewHolder {
         return when (p1) {
@@ -106,17 +69,14 @@ class MainRecyclerAdapter() : RecyclerView.Adapter<ViewHolder>() {
                         }
                     }
                 }
-            setAnimation(p0.itemView, p1)
+//            setAnimation(p0.itemView, p1)
         }
-    private fun setAnimation(viewToAnimate: View, position: Int) {
-//        if (position > lastPosition) {
+    fun setAnimation(viewToAnimate: View) {
             val animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left)
             viewToAnimate.startAnimation(animation)
             animation.duration = 500
-//            lastPosition = position
-//        }
     }
-    private fun setRemovalAnimation(viewToAnimate: View) {
+    fun setRemovalAnimation(viewToAnimate: View) {
             val animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_out_right)
             animation.duration = 500
             viewToAnimate.startAnimation(animation)
@@ -152,6 +112,8 @@ class MainRecyclerAdapter() : RecyclerView.Adapter<ViewHolder>() {
 
     }
     private val differ = AsyncListDiffer(this, differCallback)
+
+    fun getCurrentDataSet() = list
 }
 
 data class ItemModel(var id: Int, var title: String? = null, var name: String? = null, var description: String ?= null, var type :Int = 0)
