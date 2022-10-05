@@ -15,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.listwithanimation.R
 import com.example.listwithanimation.databinding.ContentItemLayoutBinding
 import com.example.listwithanimation.databinding.TitleLayoutBinding
+import java.util.*
+import kotlin.math.abs
 
 
 class MainRecyclerAdapter() : RecyclerView.Adapter<ViewHolder>() {
@@ -25,35 +27,52 @@ class MainRecyclerAdapter() : RecyclerView.Adapter<ViewHolder>() {
     var onItemClickCallback: ((Int) -> Unit)? = null
 
     fun addAll(lst: List<ItemModel>) {
-        differ.submitList(lst.reversed())
-//        list.clear()
-//        list.addAll(lst)
-//        notifyItemRangeInserted(0, list.size)
+//        differ.submitList(lst.reversed())
+        list.clear()
+        list.addAll(lst.reversed())
+        notifyItemRangeInserted(0, list.size)
     }
     fun setActivityContext(context: Context) {
         this.context = context
     }
     fun addOne(item: ItemModel) {
-        list = differ.currentList.toMutableList()
+//        list = differ.currentList.toMutableList()
         list.reverse()
         list.add(item)
         list.reverse()
-        differ.submitList(list)
+        notifyItemInserted(0)
+//        differ.submitList(list)
     }
-
+    fun move(firstPosition: Int, secondPosition: Int) {
+        var count = abs(firstPosition - 1 - secondPosition)
+        while(count > 0) {
+            list.swap( count, count - 1)
+            notifyItemMoved( count, count - 1)
+            count--
+        }
+    }
+    private fun <T> MutableList<T>.swap(index1: Int, index2: Int){
+        val tmp = this[index1]
+        this[index1] = this[index2]
+        this[index2] = tmp
+    }
     fun removeOne(view: View?, position: Int) {
 
-        list = differ.currentList.toMutableList()
-//        view?.let {
+//        list = differ.currentList.toMutableList()
+//        list.reversed()
+        view?.let {
 //            setRemovalAnimation(it)
 //            it.isVisible = false
-//        }
-//        Handler().postDelayed({
-            list.removeAt(position)
-//            notifyItemRemoved(position)
-////            notifyItemRangeChanged(0, position)
-//        }, 1000)
-        differ.submitList(list)
+//            Handler().postDelayed({
+                list.removeAt(position)
+//            list.reversed()
+                notifyItemRemoved(position)
+//            notifyDataSetChanged()
+//            notifyItemRangeChanged(position, list.size)
+//            }, 500)
+            setRemovalAnimation(it)
+//        differ.submitList(list)
+        }
     }
 
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): ViewHolder {
@@ -70,40 +89,39 @@ class MainRecyclerAdapter() : RecyclerView.Adapter<ViewHolder>() {
     }
 
     override fun getItemCount(): Int {
-        return differ.currentList.size
-//        return list.size
+//        return differ.currentList.size
+        return list.size
     }
 
     override fun onBindViewHolder(p0: ViewHolder, p1: Int) {
         p0.apply {
                 when (p0) {
                         is TitleLayoutViewHolder -> {
-//                            p0.bind(list[p1])
-                           p0.bind(differ.currentList[p1])
+                            p0.bind(list[p1])
+//                           p0.bind(differ.currentList[p1])
                         }
                         is ContentLayoutViewHolder -> {
-//                            p0.bind(list[p1])
-                            p0.bind(differ.currentList[p1])
+                            p0.bind(list[p1])
+//                            p0.bind(differ.currentList[p1])
                         }
                     }
                 }
-//            setAnimation(p0.itemView, p1)
+            setAnimation(p0.itemView, p1)
         }
     private fun setAnimation(viewToAnimate: View, position: Int) {
-        if (position > lastPosition) {
+//        if (position > lastPosition) {
             val animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left)
             viewToAnimate.startAnimation(animation)
             animation.duration = 500
-            lastPosition = position
-        }
+//            lastPosition = position
+//        }
     }
     private fun setRemovalAnimation(viewToAnimate: View) {
             val animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_out_right)
-            animation.duration = 1000
+            animation.duration = 500
             viewToAnimate.startAnimation(animation)
-            lastPosition = 0
     }
-    override fun getItemViewType(position: Int): Int = differ.currentList[position].type
+    override fun getItemViewType(position: Int): Int = list[position].type
 
     inner class TitleLayoutViewHolder(private var binding: TitleLayoutBinding) : ViewHolder(binding.root) {
         fun bind(item: ItemModel) {

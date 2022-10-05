@@ -11,7 +11,7 @@ import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.example.listwithanimation.adapters.ItemModel
 import com.example.listwithanimation.adapters.MainRecyclerAdapter
 import com.example.listwithanimation.databinding.ActivityMainBinding
@@ -38,7 +38,17 @@ class MainActivity : AppCompatActivity() {
             binding.cvBottomAddItem.isVisible = false
             hideKeyboard()
             adapter.addOne(ItemModel(1, null, binding.edtAddName.text.toString(), binding.edtAddDescription.text.toString(), type = 1))
-            binding.rvMain.smoothScrollToPosition(adapter.itemCount)
+            binding.rvMain.smoothScrollToPosition(0)
+        }
+        binding.btnCancelMove.setOnClickListener {
+            binding.cvBottomMoveItem.isVisible = false
+            hideKeyboard()
+        }
+        binding.btnOkMove.setOnClickListener {
+            binding.cvBottomMoveItem.isVisible = false
+            hideKeyboard()
+            adapter.move(binding.edtMovePosition.text.toString().toInt(), 0)
+            binding.rvMain.smoothScrollToPosition(0)
         }
     }
 
@@ -60,12 +70,16 @@ class MainActivity : AppCompatActivity() {
                         inRemoveMode = true
                         Toast.makeText(this@MainActivity, "Select item to remove", Toast.LENGTH_SHORT).show()
                     }
+                    binding.fabLayout.fabMove.startAnimation(showFab)
+                    binding.fabLayout.fabMove.isClickable = true
+                    binding.fabLayout.fabMove.setOnClickListener {
+                        binding.cvBottomMoveItem.isVisible = true
+                    }
                 }else {
                     inRemoveMode = false
                     binding.fabLayout.fabAdd.startAnimation(hideFab)
-                    binding.fabLayout.fabAdd.isClickable = true
                     binding.fabLayout.fabRemove.startAnimation(hideFab)
-                    binding.fabLayout.fabRemove.isClickable = true
+                    binding.fabLayout.fabMove.startAnimation(hideFab)
                 }
                 count++
             }
@@ -90,6 +104,7 @@ class MainActivity : AppCompatActivity() {
         binding.rvMain.adapter = adapter
 //        val animator = CustomAnimators(this)
 //        binding.rvMain.itemAnimator = animator
+        (binding.rvMain.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
     }
 
 

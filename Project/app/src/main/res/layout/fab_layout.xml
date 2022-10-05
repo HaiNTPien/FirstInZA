@@ -28,6 +28,17 @@
             android:visibility="invisible"
             app:backgroundTint="@color/teal_200"
             app:fabSize="mini" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabMove"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="150dp"
+            android:src="@drawable/ic_move"
+            android:visibility="invisible"
+            app:backgroundTint="@color/teal_200"
+            app:fabSize="mini" />
 
     </FrameLayout>
 </layout>
