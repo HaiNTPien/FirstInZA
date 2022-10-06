@@ -2,6 +2,8 @@ package com.example.listwithanimation
 
 import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -10,15 +12,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.example.listwithanimation.adapters.ItemModel
 import com.example.listwithanimation.adapters.MainRecyclerAdapter
 import com.example.listwithanimation.databinding.ActivityMainBinding
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
 
@@ -41,9 +40,7 @@ class MainActivity : AppCompatActivity() {
         }
         binding.btnOk.setOnClickListener {
             binding.cvBottomAddItem.isVisible = false
-            hideKeyboard()
             addOne(ItemModel(1, null, binding.edtAddName.text.toString(), binding.edtAddDescription.text.toString(), type = 1))
-            binding.rvMain.smoothScrollToPosition(0)
         }
         binding.btnCancelMove.setOnClickListener {
             binding.cvBottomMoveItem.isVisible = false
@@ -51,9 +48,7 @@ class MainActivity : AppCompatActivity() {
         }
         binding.btnOkMove.setOnClickListener {
             binding.cvBottomMoveItem.isVisible = false
-            hideKeyboard()
-            move(binding.edtMovePosition.text.toString().toInt(), 0)
-            binding.rvMain.smoothScrollToPosition(0)
+            move(binding.edtMovePosition.text.toString().toInt(), 1)
         }
     }
 
@@ -94,8 +89,10 @@ class MainActivity : AppCompatActivity() {
     private fun initList() {
         adapter = MainRecyclerAdapter()
         adapter.setActivityContext(context = this)
+
         var linearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 //        linearLayoutManager.stackFromEnd = true
+
         binding.rvMain.apply {
             layoutManager = linearLayoutManager
         }
@@ -106,6 +103,8 @@ class MainActivity : AppCompatActivity() {
                 removeOne(binding.rvMain.findViewHolderForAdapterPosition(it)?.itemView ,it)
             }
         }
+        binding.rvMain.setHasFixedSize(true)
+        binding.rvMain.recycledViewPool.setMaxRecycledViews(3, 0)
         binding.rvMain.adapter = adapter
 //        val animator = CustomAnimators(this)
 //        binding.rvMain.itemAnimator = animator
@@ -118,9 +117,21 @@ class MainActivity : AppCompatActivity() {
             ItemModel(2, null , "Item 1", "Description For Item 1",1),
             ItemModel(3, null, "Item 2", "Description For Item 2",1),
             ItemModel(4, null, "Item 3", "Description For Item 3",1),
+            ItemModel(4, null, "Item 4", "Description For Item 3",1),
+                ItemModel(4, null, "Item 5", "Description For Item 3",1),
+                ItemModel(4, null, "Item 6", "Description For Item 3",1),
+                ItemModel(4, null, "Item 7", "Description For Item 3",1),
+                ItemModel(4, null, "Item 8", "Description For Item 3",1),
             ItemModel(5, "Group B", null, null,0),
-            ItemModel(6, null, "Item Z", "Description For Item Z",1),
-            ItemModel(7, null, "Item X", "Description For Item X",1))
+            ItemModel(6, null, "Item 9", "Description For Item Z",1),
+            ItemModel(3, null, "Item 10", "Description For Item 2",1),
+            ItemModel(4, null, "Item 11", "Description For Item 3",1),
+                ItemModel(4, null, "Item 12", "Description For Item 3",1),
+                ItemModel(4, null, "Item 13", "Description For Item 3",1),
+                ItemModel(4, null, "Item 14", "Description For Item 3",1),
+                ItemModel(4, null, "Item 15", "Description For Item 3",1),
+            ItemModel(3, null, "Item 16", "Description For Item 2",1),
+            ItemModel(4, null, "Item 17", "Description For Item 3",1, isPivot = true))
     }
 
     private fun hideKeyboard() {
@@ -130,61 +141,43 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun move(firstPosition: Int, secondPosition: Int) {
-        var count = abs(firstPosition - 1 - secondPosition)
-        while(count > 0) {
-            adapter.getCurrentDataSet().swap( count, count - 1)
-            adapter.notifyItemMoved( count, count - 1)
-            count--
-        }
-        adapter.notifyItemChanged(0)
-//        binding.rvMain.findViewHolderForAdapterPosition(0)?.itemView?.let {
-//            adapter.setAnimation(it, 0)
-//
-//        }
-    }
     private fun <T> MutableList<T>.swap(index1: Int, index2: Int){
         val tmp = this[index1]
         this[index1] = this[index2]
         this[index2] = tmp
     }
-    fun removeOne(view: View?, position: Int) {
+    fun move(firstPosition: Int, secondPosition: Int) {
+        var count = abs(firstPosition - secondPosition)
+        while(count > 0) {
+            adapter.getCurrentDataSet().swap(count + 1, count)
+            adapter.notifyItemMoved(count + 1, count)
+            count--
+        }
+        adapter.notifyItemChanged(1)
+    }
 
-//        list = differ.currentList.toMutableList()
-//        list.reversed()
+    fun removeOne(view: View?, position: Int) {
         view?.let {
-//            setRemovalAnimation(it)
-//            it.isVisible = false
-//            Handler().postDelayed({
-            adapter.getCurrentDataSet().removeAt(position)
-//            list.reversed()
-            adapter.notifyItemRemoved(position)
-//            notifyDataSetChanged()
-//            notifyItemRangeChanged(position, list.size)
-//            }, 500)
             adapter.setRemovalAnimation(it)
-//        differ.submitList(list)
+        }
+            adapter.apply {
+                getCurrentDataSet().removeAt(position)
+                notifyItemRemoved(position)
         }
     }
 
     fun addOne(item: ItemModel) {
-//        list = differ.currentList.toMutableList()
         runBlocking {
-                adapter.getCurrentDataSet().reverse()
-                adapter.getCurrentDataSet().add(item)
-                adapter.getCurrentDataSet().reverse()
-//                withContext(Dispatchers.Main) {
-                    adapter.notifyItemInserted(0)
-//                }
-
+            adapter.getCurrentDataSet().reverse()
+            adapter.getCurrentDataSet().add(adapter.itemCount - 1, item)
+            adapter.getCurrentDataSet().reverse()
+            adapter.notifyItemInserted(1)
         }
         binding.rvMain.postDelayed({
-            val view = binding.rvMain.findViewHolderForAdapterPosition(0)
+            val view = binding.rvMain.findViewHolderForAdapterPosition(1)
             if(view != null){
                 adapter.setAnimation(view.itemView)
             }
-        }, 50)
-//        differ.submitList(list)
+        }, 0)
     }
-
 }

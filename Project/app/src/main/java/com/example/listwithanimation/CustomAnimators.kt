@@ -2,6 +2,7 @@ package com.example.listwithanimation
 
 import android.animation.AnimatorInflater
 import android.content.Context
+import android.view.animation.AnimationUtils
 import android.view.animation.BounceInterpolator
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
@@ -15,24 +16,22 @@ class CustomAnimators(context: Context) : SimpleItemAnimator() {
     }
 
     override fun animateRemove(holder: RecyclerView.ViewHolder): Boolean {
-        val set = AnimatorInflater.loadAnimator(
-            context,
-            R.animator.item_slide_out
-        )
-        set.interpolator = BounceInterpolator()
-        set.setTarget(holder.itemView)
-        set.start()
+//        val set = AnimatorInflater.loadAnimator(
+//            context,
+//            R.animator.item_slide_out
+//        )
+        val set = AnimationUtils.loadAnimation(context, android.R.anim.slide_out_right)
+        set.duration = 500
+//        set.interpolator = BounceInterpolator()
+        holder.itemView.startAnimation(set)
         return true
     }
 
     override fun animateAdd(holder: RecyclerView.ViewHolder): Boolean {
-        val set = AnimatorInflater.loadAnimator(
-            context,
-            R.animator.item_slide_in
-        )
-        set.interpolator = BounceInterpolator()
-        set.setTarget(holder.itemView)
-        set.start()
+        val set = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left)
+        set.duration = 500
+//        set.interpolator = BounceInterpolator()
+        holder.itemView.startAnimation(set)
         return true
     }
 
