@@ -1,65 +1,38 @@
 package com.example.listwithanimation
 
-import android.animation.AnimatorInflater
-import android.content.Context
-import android.view.animation.AnimationUtils
-import android.view.animation.BounceInterpolator
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
 
 
-class CustomAnimators(context: Context) : SimpleItemAnimator() {
-    var context: Context
+open class SlideInDownAnimator : BaseItemAnimator() {
 
-    init {
-        this.context = context
+    override fun preAnimateRemoveImpl(holder: RecyclerView.ViewHolder) {
     }
 
-    override fun animateRemove(holder: RecyclerView.ViewHolder): Boolean {
-//        val set = AnimatorInflater.loadAnimator(
-//            context,
-//            R.animator.item_slide_out
-//        )
-        val set = AnimationUtils.loadAnimation(context, android.R.anim.slide_out_right)
-        set.duration = 500
-//        set.interpolator = BounceInterpolator()
-        holder.itemView.startAnimation(set)
-        return true
+    override fun animateRemoveImpl(holder: RecyclerView.ViewHolder) {
+        holder.itemView.animate().apply {
+            translationY(0F)
+            alpha(0f)
+            duration = removeDuration
+            interpolator = interpolator
+            startDelay = getRemoveDelay(holder)
+        }.start()
     }
 
-    override fun animateAdd(holder: RecyclerView.ViewHolder): Boolean {
-        val set = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left)
-        set.duration = 500
-//        set.interpolator = BounceInterpolator()
-        holder.itemView.startAnimation(set)
-        return true
+    override fun preAnimateAddImpl(holder: RecyclerView.ViewHolder) {
+        addDuration = moveDuration
+        holder.itemView.translationY = -holder.itemView.height.toFloat()
+        holder.itemView.alpha = 1f
     }
 
-    override fun animateMove(
-        holder: RecyclerView.ViewHolder,
-        fromX: Int,
-        fromY: Int,
-        toX: Int,
-        toY: Int
-    ): Boolean {
-        return false
+    override fun animateAddImpl(holder: RecyclerView.ViewHolder) {
+        holder.itemView.animate().apply {
+            translationY(0f)
+            alpha(1f)
+            duration = addDuration
+            interpolator = interpolator
+            startDelay = getAddDelay()
+        }.start()
     }
 
-    override fun animateChange(
-        oldHolder: RecyclerView.ViewHolder,
-        newHolder: RecyclerView.ViewHolder,
-        fromLeft: Int,
-        fromTop: Int,
-        toLeft: Int,
-        toTop: Int
-    ): Boolean {
-        return false
-    }
-
-    override fun runPendingAnimations() {}
-    override fun endAnimation(item: RecyclerView.ViewHolder) {}
-    override fun endAnimations() {}
-    override fun isRunning(): Boolean {
-        return false
-    }
 }
+

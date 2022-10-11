@@ -79,16 +79,7 @@ class MainRecyclerAdapter() : RecyclerView.Adapter<ViewHolder>() {
                 }
 //            setAnimation(p0.itemView, p1)
         }
-    fun setAnimation(viewToAnimate: View) {
-        val animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_in_left)
-        animation.duration = 500
-        viewToAnimate.startAnimation(animation)
-    }
-    fun setRemovalAnimation(viewToAnimate: View) {
-        val animation = AnimationUtils.loadAnimation(context, android.R.anim.slide_out_right)
-        animation.duration = 500
-        viewToAnimate.startAnimation(animation)
-    }
+
     override fun getItemViewType(position: Int): Int = list[position].type
 
     inner class TitleLayoutViewHolder(private var binding: TitleLayoutBinding) : ViewHolder(binding.root) {
@@ -100,30 +91,24 @@ class MainRecyclerAdapter() : RecyclerView.Adapter<ViewHolder>() {
 
     inner class ContentLayoutViewHolder(private var binding: ContentItemLayoutBinding) : ViewHolder(binding.root) {
         fun bind(item: ItemModel) {
+
             if (item.isPivot) {
                 binding.root.layoutParams.height = 0
-            }else {
+            } else {
+                binding.root.layoutParams = RecyclerView.LayoutParams(
+                    RecyclerView.LayoutParams.WRAP_CONTENT,
+                    RecyclerView.LayoutParams.WRAP_CONTENT
+                )
                 binding.tvName.text = item.name
                 binding.tvDescription.text = item.description
 
                 binding.root.setOnClickListener {
                     onItemClickCallback?.invoke(adapterPosition)
                 }
+
             }
         }
     }
-
-//    private val differCallback = object : DiffUtil.ItemCallback<ItemModel>(){
-//        override fun areItemsTheSame(oldItem: ItemModel, newItem: ItemModel): Boolean {
-//            return  oldItem.id == newItem.id
-//        }
-//
-//        override fun areContentsTheSame(oldItem: ItemModel, newItem: ItemModel): Boolean {
-//            return oldItem == newItem
-//        }
-//
-//    }
-//    val differ = AsyncListDiffer(this, differCallback)
 
     fun getCurrentDataSet() = list
 }
