@@ -96,7 +96,7 @@ class MainRecyclerAdapter() : RecyclerView.Adapter<ViewHolder>() {
                 binding.root.layoutParams.height = 0
             } else {
                 binding.root.layoutParams = RecyclerView.LayoutParams(
-                    RecyclerView.LayoutParams.WRAP_CONTENT,
+                    RecyclerView.LayoutParams.MATCH_PARENT,
                     RecyclerView.LayoutParams.WRAP_CONTENT
                 )
                 binding.tvName.text = item.name

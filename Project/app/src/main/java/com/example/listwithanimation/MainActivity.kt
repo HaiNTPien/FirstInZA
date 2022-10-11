@@ -161,24 +161,31 @@ class MainActivity : AppCompatActivity() {
 //            count--
 //        }
 //        adapter.notifyItemChanged(1)
-        val item = adapter.getCurrentDataSet()[firstPosition]
+
+        binding.rvMain.post {
+            val item = adapter.getCurrentDataSet()[firstPosition]
 //        item.name = "Abas"
-        adapter.getCurrentDataSet().removeAt(firstPosition)
-        adapter.getCurrentDataSet().add(1, item)
-        adapter.notifyItemMoved(firstPosition, 1)
+            adapter.getCurrentDataSet().removeAt(firstPosition)
+            adapter.getCurrentDataSet().add(1, item)
+            adapter.notifyItemMoved(firstPosition, 1)
+        }
 //        adapter.notifyItemChanged(1)
     }
 
     private fun removeOne(position: Int) {
+        binding.rvMain.post{
             adapter.apply {
                 getCurrentDataSet().removeAt(position)
                 notifyItemRemoved(position)
+            }
         }
     }
 
     private fun addOne(item: ItemModel) {
+        binding.rvMain.post{
             adapter.getCurrentDataSet().add(1, item)
             adapter.notifyItemInserted(1)
+        }
 //        binding.rvMain.smoothScrollToPosition(0)
     }
 }
