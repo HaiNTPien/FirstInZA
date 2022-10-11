@@ -15,10 +15,6 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
     private val additionsList = ArrayList<ArrayList<RecyclerView.ViewHolder>>()
     private val movesList = ArrayList<ArrayList<MoveInfo>>()
     private val changesList = ArrayList<ArrayList<ChangeInfo>>()
-    private var addAnimations = ArrayList<RecyclerView.ViewHolder>()
-    private val moveAnimations = ArrayList<RecyclerView.ViewHolder>()
-    private var removeAnimations = ArrayList<RecyclerView.ViewHolder>()
-    private val changeAnimations = ArrayList<RecyclerView.ViewHolder>()
 
     init {
         supportsChangeAnimations = false
@@ -34,7 +30,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
 
     private class MoveInfo(var holder: RecyclerView.ViewHolder, var fromX: Int, var toX: Int, var fromY: Int, var toY: Int)
 
-    private class ChangeInfo(var oldHolder: RecyclerView.ViewHolder? = null, var newHolder: RecyclerView.ViewHolder? = null, var fromX: Int = 0, var toX: Int = 0, var fromY: Int = 0, var toY: Int = 0)
+    private class ChangeInfo(var oldHolder: RecyclerView.ViewHolder? = null, var newHolder: RecyclerView.ViewHolder? = null)
 
     override fun runPendingAnimations() {
         val removalsPending = pendingRemovals.isNotEmpty()
@@ -47,7 +43,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
 
         for (holder in pendingRemovals) {
             animateRemoveImpl(holder)
-            removeAnimations.add(holder)
+//            removeAnimations.add(holder)
         }
         pendingRemovals.clear()
 
@@ -109,7 +105,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
                 }
                 for (holder in additions) {
                     animateAddImpl(holder)
-                    addAnimations.add(holder)
+//                    addAnimations.add(holder)
                 }
                 additions.clear()
             }
@@ -185,7 +181,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
             view.animate().translationY(0f)
         }
 
-        moveAnimations.add(holder)
+//        moveAnimations.add(holder)
         val animation = view.animate()
         animation.setDuration(moveDuration).setListener(object : Animator.AnimatorListener {
             override fun onAnimationStart(animator: Animator) {
@@ -207,7 +203,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
             override fun onAnimationEnd(animator: Animator) {
                 animation.setListener(null)
                 dispatchMoveFinished(holder)
-                moveAnimations.remove(holder)
+//                moveAnimations.remove(holder)
                 dispatchFinishedWhenDone()
             }
         }).start()
@@ -233,7 +229,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
         newHolder.itemView.translationX = -deltaX.toFloat()
         newHolder.itemView.translationY = -deltaY.toFloat()
         newHolder.itemView.alpha = 0f
-        pendingChanges.add(ChangeInfo(oldHolder, newHolder, fromX, toX, fromY, toY))
+        pendingChanges.add(ChangeInfo(oldHolder, newHolder))
         return true
     }
 
@@ -243,7 +239,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
         val newHolder = changeInfo.newHolder
         val newView = newHolder?.itemView
         if (view != null) {
-            changeAnimations.add(holder)
+//            changeAnimations.add(holder)
             val oldViewAnim = view.animate().setDuration(0)
                 .alpha(0f)
                 .translationX(0F)
@@ -259,7 +255,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
                     view.translationX = 0f
                     view.translationY = 0f
                     dispatchChangeFinished(holder, true)
-                    changeAnimations.remove(holder)
+//                    changeAnimations.remove(holder)
                     dispatchFinishedWhenDone()
                 }
 
@@ -271,7 +267,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
             }).start()
         }
         if (newView != null) {
-            changeAnimations.add(newHolder)
+//            changeAnimations.add(newHolder)
             val newViewAnimation = newView.animate()
             newViewAnimation.translationX(0f).translationY(0f).setDuration(changeDuration)
                 .alpha(1f)
@@ -286,7 +282,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
                             newView.translationX = 0f
                             newView.translationY = 0f
                             dispatchChangeFinished(newHolder, false)
-                            changeAnimations.remove(newHolder)
+//                            changeAnimations.remove(newHolder)
                             dispatchFinishedWhenDone()
                         }
 
@@ -407,10 +403,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
                 }
             }
         }
-        cancelAll(removeAnimations)
-        cancelAll(moveAnimations)
-        cancelAll(addAnimations)
-        cancelAll(changeAnimations)
+
         dispatchAnimationsFinished()
     }
 
@@ -423,11 +416,6 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
         }
     }
 
-    private fun cancelAll(viewHolders: List<RecyclerView.ViewHolder>) {
-        for (i in viewHolders.indices.reversed()) {
-            viewHolders[i].itemView.animate().cancel()
-        }
-    }
 
     override fun endAnimation(item: RecyclerView.ViewHolder) {
         val view = item.itemView
@@ -488,8 +476,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
 
     override fun isRunning(): Boolean {
         return (pendingAdditions.isNotEmpty() || pendingChanges.isNotEmpty() || pendingMoves.isNotEmpty()
-                || pendingRemovals.isNotEmpty() || moveAnimations.isNotEmpty() || removeAnimations.isNotEmpty()
-                || addAnimations.isNotEmpty() || changeAnimations.isNotEmpty() || movesList.isNotEmpty()
+                || pendingRemovals.isNotEmpty()  || movesList.isNotEmpty()
                 || additionsList.isNotEmpty() || changesList.isNotEmpty())
     }
 
