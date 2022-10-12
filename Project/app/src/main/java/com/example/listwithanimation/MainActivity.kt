@@ -9,7 +9,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.listwithanimation.ViewHelper.hideKeyboard
 import com.example.listwithanimation.adapters.ItemModel
 import com.example.listwithanimation.adapters.MainRecyclerAdapter
 import com.example.listwithanimation.databinding.ActivityMainBinding
@@ -95,6 +94,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initList() {
         val linearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        
         adapter.addAll(mockData())
         adapter.onItemClickCallback = {
             if (inRemoveMode && it != -1) {
