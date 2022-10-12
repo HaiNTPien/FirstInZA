@@ -17,7 +17,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
     private val changesList = ArrayList<ArrayList<ChangeInfo>>()
 
     init {
-        supportsChangeAnimations = false
+        supportsChangeAnimations = true
     }
 
     protected open fun preAnimateRemoveImpl(holder: RecyclerView.ViewHolder) {}
