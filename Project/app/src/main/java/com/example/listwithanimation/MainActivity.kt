@@ -94,9 +94,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun initList() {
         val linearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        
+
         adapter.addAll(mockData())
         adapter.onItemClickCallback = {
+            Toast.makeText(this@MainActivity, it.toString() + " " + adapter.itemCount.toString(), Toast.LENGTH_SHORT).show()
             if (inRemoveMode && it != -1) {
                 removeOne(it)
             }
@@ -104,9 +105,9 @@ class MainActivity : AppCompatActivity() {
 
         val animator = SlideInDownAnimator()
         binding.rvMain.apply {
-            layoutManager = linearLayoutManager
             setHasFixedSize(true)
             recycledViewPool.setMaxRecycledViews(3, 0)
+            layoutManager = linearLayoutManager
             adapter = this@MainActivity.adapter
             itemAnimator = animator
         }
@@ -119,32 +120,7 @@ class MainActivity : AppCompatActivity() {
             ItemModel(2, null, "Item 1", "Description For Item 1", 1),
             ItemModel(3, null, "Item 2", "Description For Item 2", 1),
             ItemModel(4, null, "Item 3", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 4", "Description For Item 3", 1),
-            ItemModel(3, null, "Item 5", "Description For Item 2", 1),
-            ItemModel(4, null, "Item 6", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 7", "Description For Item 3", 1),
-            ItemModel(3, null, "Item 8", "Description For Item 2", 1),
             ItemModel(4, null, "Item 9", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 10", "Description For Item 3", 1),
-            ItemModel(3, null, "Item 11", "Description For Item 2", 1),
-            ItemModel(4, null, "Item 12", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 13", "Description For Item 3", 1),
-            ItemModel(3, null, "Item 14", "Description For Item 2", 1),
-            ItemModel(4, null, "Item 15", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 16", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 17", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 18", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 19", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 20", "Description For Item 3", 1),
-            ItemModel(5, "Group B", null, null, 0),
-            ItemModel(6, null, "Item 21", "Description For Item Z", 1),
-            ItemModel(3, null, "Item 22", "Description For Item 2", 1),
-            ItemModel(4, null, "Item 23", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 24", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 25", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 26", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 27", "Description For Item 3", 1),
-            ItemModel(3, null, "Item 28", "Description For Item 2", 1),
             ItemModel(4, null, "Item 29", "Description For Item 3", 1, isPivot = true)
         )
     }
@@ -167,6 +143,7 @@ class MainActivity : AppCompatActivity() {
             adapter.apply {
                 getCurrentDataSet().removeAt(position)
                 notifyItemRemoved(position)
+//                notifyDataSetChanged()
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.example.listwithanimation.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
@@ -70,6 +71,7 @@ class MainRecyclerAdapter : RecyclerView.Adapter<ViewHolder>() {
         ViewHolder(binding.root) {
         fun bind(item: ItemModel) {
             binding.tvTitle.text = item.title
+            binding.root.translationZ = 4F
         }
 
     }
@@ -77,9 +79,10 @@ class MainRecyclerAdapter : RecyclerView.Adapter<ViewHolder>() {
     inner class ContentLayoutViewHolder(private var binding: ContentItemLayoutBinding) :
         ViewHolder(binding.root) {
         fun bind(item: ItemModel) {
+            binding.root.translationZ = 4F
 
             if (item.isPivot) {
-                binding.root.layoutParams.height = 0
+                binding.root.layoutParams.height = 1
             } else {
                 binding.root.layoutParams = RecyclerView.LayoutParams(
                     RecyclerView.LayoutParams.MATCH_PARENT, RecyclerView.LayoutParams.WRAP_CONTENT
