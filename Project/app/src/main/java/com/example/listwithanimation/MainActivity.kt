@@ -81,11 +81,18 @@ class MainActivity : AppCompatActivity() {
                     binding.fabLayout.fabMove.setOnClickListener {
                         binding.cvBottomMoveItem.isVisible = true
                     }
+                    binding.fabLayout.fabShuffle.startAnimation(showFab)
+                    binding.fabLayout.fabShuffle.isClickable = true
+                    binding.fabLayout.fabShuffle.setOnClickListener {
+                        shuffleList()
+                    }
+
                 } else {
                     inRemoveMode = false
                     binding.fabLayout.fabAdd.startAnimation(hideFab)
                     binding.fabLayout.fabRemove.startAnimation(hideFab)
                     binding.fabLayout.fabMove.startAnimation(hideFab)
+                    binding.fabLayout.fabShuffle.startAnimation(hideFab)
                 }
                 count++
             }
@@ -115,17 +122,32 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun mockData(): List<ItemModel> {
-        return listOf(
-            ItemModel(1, "Group A", null, null, 0),
-            ItemModel(2, null, "Item 1", "Description For Item 1", 1),
-            ItemModel(3, null, "Item 2", "Description For Item 2", 1),
-            ItemModel(4, null, "Item 3", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 9", "Description For Item 3", 1),
-            ItemModel(4, null, "Item 29", "Description For Item 3", 1, isPivot = true)
-        )
+        val list = mutableListOf<ItemModel>()
+        for(i in 0..1000) {
+            list.add(ItemModel(i + 1, null, "Item " + (i + 1).toString(), "Description for " + (i + 1).toString(), type = 1))
+        }
+        list[1000].isPivot = true
+        return list.toList()
     }
 
+    private fun mockData2(): List<ItemModel> {
+        val list = mutableListOf<ItemModel>()
+        for(i in 0..1000) {
+            list.add(ItemModel(i + 1, null, " " + (i + 1).toString(), "D " + (i + 1).toString(), type = 1))
+        }
+        list[1000].isPivot = true
+        return list.toList()
+    }
 
+//    private fun mockData(): List<ItemModel> {
+//        return listOf(
+//            ItemModel(1, null, "Item 1", "Description For Item 1", 1),
+//            ItemModel(2, null, "Item 2", "Description For Item 2", 1),
+//            ItemModel(3, null, "Item 3", "Description For Item 3", 1),
+//            ItemModel(4, null, "Item 4", "Description For Item 3", 1),
+//            ItemModel(0, null, "Item 29", "Description For Item 3", 1, isPivot = true)
+//        )
+//    }
 
     private fun move(firstPosition: Int, secondPosition: Int) {
         binding.rvMain.post {
@@ -152,6 +174,12 @@ class MainActivity : AppCompatActivity() {
         binding.rvMain.post {
             adapter.getCurrentDataSet().add(1, item)
             adapter.notifyItemInserted(1)
+        }
+    }
+
+    private fun shuffleList() {
+        binding.rvMain.post {
+            adapter.submitList(adapter.getCurrentDataSet().shuffled().toList())
         }
     }
 }

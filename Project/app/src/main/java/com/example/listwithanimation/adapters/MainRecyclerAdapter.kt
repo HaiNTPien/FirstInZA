@@ -1,5 +1,6 @@
 package com.example.listwithanimation.adapters
 
+import android.content.ClipData.Item
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -9,12 +10,12 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.listwithanimation.R
 import com.example.listwithanimation.databinding.ContentItemLayoutBinding
 import com.example.listwithanimation.databinding.TitleLayoutBinding
+import java.util.stream.Collectors
 
 
 class MainRecyclerAdapter : RecyclerView.Adapter<ViewHolder>() {
 
     private var list = mutableListOf<ItemModel>()
-
     var onItemClickCallback: ((Int) -> Unit)? = null
 
 
@@ -22,6 +23,35 @@ class MainRecyclerAdapter : RecyclerView.Adapter<ViewHolder>() {
         list.clear()
         list.addAll(lst.reversed())
         notifyItemRangeInserted(0, list.size)
+    }
+
+    fun submitList(newList : List<ItemModel>) {
+        val startTime = System.nanoTime()
+        val newMap: HashSet<ItemModel> =
+            newList.toHashSet()
+        val oldMap: HashSet<ItemModel> =
+            list.toHashSet()
+        for(i in itemCount - 1  downTo  1){
+            if (!newMap.contains(list[i])) {
+                    list.removeAt(i)
+                    notifyItemRemoved(i)
+                }
+        }
+        for(i in 1 until newList.size) {
+            if(!oldMap.contains(newList[i])){
+                    list.add(i, newList[i])
+                    notifyItemInserted(i)
+                }
+        }
+        for (i in 1 until newList.size) {
+            val oldPosition = list.indexOf(newList[i])
+            if (oldPosition != i){
+                val item = list.removeAt(oldPosition)
+                list.add(i, item)
+                notifyItemMoved(oldPosition, i)
+            }
+        }
+        Log.d(" Time ", " Miliseconds " + (System.nanoTime() - startTime)/1000000)
     }
 
 

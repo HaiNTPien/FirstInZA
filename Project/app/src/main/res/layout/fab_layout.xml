@@ -39,6 +39,16 @@
             android:visibility="invisible"
             app:backgroundTint="@color/teal_200"
             app:fabSize="mini" />
-
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabShuffle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="190dp"
+            android:src="@drawable/ic_shuffle"
+            android:visibility="invisible"
+            app:backgroundTint="@color/teal_200"
+            app:fabSize="mini" />
     </FrameLayout>
 </layout>

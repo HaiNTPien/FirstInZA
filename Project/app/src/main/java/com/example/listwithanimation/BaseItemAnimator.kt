@@ -72,7 +72,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
             }
             if (removalsPending) {
                 val view = moves[0].holder.itemView
-                view.postOnAnimationDelayed(mover, removeDuration)
+                view.postOnAnimationDelayed(mover, REMOVE_DURATION)
             } else {
                 mover.run()
             }
@@ -95,7 +95,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
             }
             if (removalsPending) {
                 val holder = changes[0].oldHolder
-                holder!!.itemView.postOnAnimationDelayed(changer, removeDuration)
+                holder!!.itemView.postOnAnimationDelayed(changer, REMOVE_DURATION)
             } else {
                 changer.run()
             }
@@ -119,7 +119,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
             }
             if (removalsPending) {
                 val view = additions[0].itemView
-                view.postOnAnimationDelayed(adder, removeDuration)
+                view.postOnAnimationDelayed(adder, REMOVE_DURATION)
             } else {
                 adder.run()
             }
@@ -197,7 +197,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
             animation.translationY(0f)
         }
 
-        animation.setDuration(moveDuration).setListener(object : AnimatorListener {
+        animation.setDuration(MOVE_DURATION).setListener(object : AnimatorListener {
             override fun onAnimationStart(animator: Animator) {
                 dispatchMoveStarting(holder)
             }
@@ -284,7 +284,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
         if (newView != null) {
 //            changeAnimations.add(newHolder)
             val newViewAnimation = newView.animate()
-            newViewAnimation.translationX(0f).translationY(0f).setDuration(changeDuration)
+            newViewAnimation.translationX(0f).translationY(0f).setDuration(CHANGE_DURATION)
                 .alpha(1f)
                     .setListener(object : AnimatorListener {
                         override fun onAnimationStart(animator: Animator) {

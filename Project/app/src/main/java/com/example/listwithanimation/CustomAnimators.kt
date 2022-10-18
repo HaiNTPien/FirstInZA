@@ -15,7 +15,7 @@ open class SlideInDownAnimator : BaseItemAnimator() {
         holder.itemView.animate().apply {
             translationY(0F)
             alpha(0f)
-            duration = removeDuration
+            duration = REMOVE_DURATION
             setListener(DefaultRemoveAnimatorListener(holder))
             interpolator = null
             startDelay = getRemoveDelay(holder)
@@ -24,7 +24,6 @@ open class SlideInDownAnimator : BaseItemAnimator() {
 
     override fun preAnimateAddImpl(holder: RecyclerView.ViewHolder) {
         Log.d(" ItemAnimator ", " preAnimateAddImpl ")
-        addDuration = moveDuration
         holder.itemView.translationZ = 0F
         holder.itemView.translationY = -holder.itemView.height.toFloat()
         holder.itemView.alpha = 1f
@@ -35,7 +34,7 @@ open class SlideInDownAnimator : BaseItemAnimator() {
         holder.itemView.animate().apply {
             translationY(0f)
             alpha(1f)
-            duration = addDuration
+            duration = ADD_DURATION
             setListener(DefaultAddAnimatorListener(holder))
             interpolator = null
             startDelay = getAddDelay(holder)
