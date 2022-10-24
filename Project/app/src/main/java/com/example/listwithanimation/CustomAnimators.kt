@@ -2,16 +2,27 @@ package com.example.listwithanimation
 
 import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter
 
 
 open class SlideInDownAnimator : BaseItemAnimator() {
 
+    init {
+        addDuration = ADD_DURATION
+        moveDuration = MOVE_DURATION
+        removeDuration = REMOVE_DURATION
+        changeDuration = CHANGE_DURATION
+    }
+    var callbackNotifyDataSetChanged: (()->Unit)? = null
+
+    override fun notifyDatasetChanged() {
+        callbackNotifyDataSetChanged?.invoke()
+    }
+
     override fun preAnimateRemoveImpl(holder: RecyclerView.ViewHolder) {
-        Log.d(" ItemAnimator ", " preAnimateRemoveImpl ")
     }
 
     override fun animateRemoveImpl(holder: RecyclerView.ViewHolder) {
-        Log.d(" ItemAnimator ", " animateRemoveImpl ")
         holder.itemView.animate().apply {
             translationY(0F)
             alpha(0f)
@@ -23,14 +34,12 @@ open class SlideInDownAnimator : BaseItemAnimator() {
     }
 
     override fun preAnimateAddImpl(holder: RecyclerView.ViewHolder) {
-        Log.d(" ItemAnimator ", " preAnimateAddImpl ")
         holder.itemView.translationZ = 0F
         holder.itemView.translationY = -holder.itemView.height.toFloat()
         holder.itemView.alpha = 1f
     }
 
     override fun animateAddImpl(holder: RecyclerView.ViewHolder) {
-        Log.d(" ItemAnimator ", " animateAddImpl ")
         holder.itemView.animate().apply {
             translationY(0f)
             alpha(1f)

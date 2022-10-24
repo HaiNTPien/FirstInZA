@@ -2,6 +2,7 @@ package com.example.listwithanimation
 
 
 import android.os.Bundle
+import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
@@ -101,8 +102,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initList() {
         val linearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-
-        adapter.addAll(mockData())
+        adapter.addAll(mockData().toMutableList().reversed().toList())
         adapter.onItemClickCallback = {
             Toast.makeText(this@MainActivity, it.toString() + " " + adapter.itemCount.toString(), Toast.LENGTH_SHORT).show()
             if (inRemoveMode && it != -1) {
@@ -110,12 +110,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val animator = SlideInDownAnimator()
         binding.rvMain.apply {
             setHasFixedSize(true)
             recycledViewPool.setMaxRecycledViews(3, 0)
             layoutManager = linearLayoutManager
             adapter = this@MainActivity.adapter
+            val animator = SlideInDownAnimator()
+            animator.callbackNotifyDataSetChanged = {
+                binding.rvMain.post{
+                    Toast.makeText(this@MainActivity, " NOTIFY ", Toast.LENGTH_SHORT).show()
+                    this@MainActivity.adapter.notifyDataSetChanged()
+                }
+            }
             itemAnimator = animator
         }
     }
@@ -123,63 +129,50 @@ class MainActivity : AppCompatActivity() {
 
     private fun mockData(): List<ItemModel> {
         val list = mutableListOf<ItemModel>()
-        for(i in 0..1000) {
+        for(i in 0..10000) {
             list.add(ItemModel(i + 1, null, "Item " + (i + 1).toString(), "Description for " + (i + 1).toString(), type = 1))
         }
-        list[1000].isPivot = true
+        list[10000].isPivot = true
         return list.toList()
     }
 
     private fun mockData2(): List<ItemModel> {
         val list = mutableListOf<ItemModel>()
-        for(i in 0..1000) {
-            list.add(ItemModel(i + 1, null, " " + (i + 1).toString(), "D " + (i + 1).toString(), type = 1))
+        for(i in 0..10000) {
+            list.add(ItemModel(i + 1, null, "Item " + (i + 1).toString(), "Description for " + (i + 1).toString(), type = 1))
         }
-        list[1000].isPivot = true
+        list[10000].isPivot = true
         return list.toList()
     }
 
-//    private fun mockData(): List<ItemModel> {
-//        return listOf(
-//            ItemModel(1, null, "Item 1", "Description For Item 1", 1),
-//            ItemModel(2, null, "Item 2", "Description For Item 2", 1),
-//            ItemModel(3, null, "Item 3", "Description For Item 3", 1),
-//            ItemModel(4, null, "Item 4", "Description For Item 3", 1),
-//            ItemModel(0, null, "Item 29", "Description For Item 3", 1, isPivot = true)
-//        )
-//    }
-
     private fun move(firstPosition: Int, secondPosition: Int) {
-        binding.rvMain.post {
-            val item = adapter.getCurrentDataSet()[firstPosition]
-            item.name = "Changed Name"
-            adapter.getCurrentDataSet().removeAt(firstPosition)
-            adapter.getCurrentDataSet().add(secondPosition, item)
-            adapter.notifyItemMoved(firstPosition, secondPosition)
-            adapter.notifyItemChanged(secondPosition)
+        runOnUiThread {
+            adapter.moveOne(firstPosition, secondPosition)
         }
     }
 
     private fun removeOne(position: Int) {
-        binding.rvMain.post {
-            adapter.apply {
-                getCurrentDataSet().removeAt(position)
-                notifyItemRemoved(position)
-//                notifyDataSetChanged()
-            }
+        runOnUiThread {
+            adapter.removeOne(position)
         }
     }
 
     private fun addOne(item: ItemModel) {
-        binding.rvMain.post {
-            adapter.getCurrentDataSet().add(1, item)
-            adapter.notifyItemInserted(1)
+        runOnUiThread {
+            adapter.addOne(1, item)
         }
     }
 
     private fun shuffleList() {
-        binding.rvMain.post {
-            adapter.submitList(adapter.getCurrentDataSet().shuffled().toList())
+        val layoutManager = binding.rvMain.layoutManager as LinearLayoutManager
+        val list = mockData().toMutableList()
+        val item = list[3]
+        list[3] = list[2]
+        list[2] = item
+        list.removeAt(7)
+        list.add(9, ItemModel(150, null, "Item " + (150).toString(), "Description for " + (150).toString(), type = 1))
+        runOnUiThread {
+            adapter.submitDataList(list.toList(), layoutManager.findFirstCompletelyVisibleItemPosition(), layoutManager.findLastCompletelyVisibleItemPosition())
         }
     }
 }
