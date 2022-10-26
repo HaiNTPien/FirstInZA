@@ -90,11 +90,6 @@ class MainRecyclerAdapter : BaseAdapter<ItemModel>() {
 
     fun configRecyclerView(rv: RecyclerView) {
         setLinearLayoutManager(rv)
-        rv.post {
-            (rv.itemAnimator as SlideInDownAnimator).callbackNotifyDataSetChanged = {
-                notifyDataSetChanged()
-            }
-        }
     }
 
     fun addAllItem(lst: List<ItemModel>) {

@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.example.listwithanimation.SlideInDownAnimator
 
 abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
 
@@ -133,6 +134,11 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
 
     protected fun setLinearLayoutManager(rv: RecyclerView) {
         recyclerViewLayoutManager = rv.layoutManager as LinearLayoutManager
+        rv.post {
+            (rv.itemAnimator as SlideInDownAnimator).callbackNotifyDataSetChanged = {
+                notifyDataSetChanged()
+            }
+        }
     }
 }
 
