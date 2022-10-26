@@ -1,11 +1,13 @@
 package com.example.listwithanimation.adapters
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.listwithanimation.R
+import com.example.listwithanimation.SlideInDownAnimator
 import com.example.listwithanimation.databinding.ContentItemLayoutBinding
 import com.example.listwithanimation.databinding.TitleLayoutBinding
 
@@ -86,7 +88,34 @@ class MainRecyclerAdapter : BaseAdapter<ItemModel>() {
         return oldItem.id == newItem.id
     }
 
+    fun configRecyclerView(rv: RecyclerView) {
+        setLinearLayoutManager(rv)
+        rv.post {
+            (rv.itemAnimator as SlideInDownAnimator).callbackNotifyDataSetChanged = {
+                notifyDataSetChanged()
+            }
+        }
+    }
 
+    fun addAllItem(lst: List<ItemModel>) {
+        addAll(lst)
+    }
+    fun removeItem(position: Int){
+        removeOne(position)
+    }
+
+    fun addItem(position: Int, item: ItemModel){
+        addOne(position, item)
+    }
+
+    fun moveItem(startPosition: Int, endPosition: Int) {
+        moveOne(startPosition, endPosition)
+
+    }
+
+    fun submitList(newList : List<ItemModel>) {
+        submitDataList(newList)
+    }
 }
 
 data class ItemModel(

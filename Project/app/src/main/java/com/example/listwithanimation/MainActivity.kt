@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initList() {
         val linearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        adapter.addAll(mockData().subList(0, 30).toMutableList().shuffled().toList())
+        adapter.addAllItem(mockData().subList(0, 30).toMutableList().shuffled().toList())
         adapter.onItemClickCallback = {
 //            Toast.makeText(this@MainActivity, it.toString() + " " + adapter.itemCount.toString(), Toast.LENGTH_SHORT).show()
             if (inRemoveMode && it != -1) {
@@ -139,17 +139,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.rvMain.apply {
-            setHasFixedSize(true)
-            recycledViewPool.setMaxRecycledViews(3, 0)
             layoutManager = linearLayoutManager
+            this@MainActivity.adapter.configRecyclerView(this)
             adapter = this@MainActivity.adapter
             val animator = SlideInDownAnimator()
-            animator.callbackNotifyDataSetChanged = {
-                binding.rvMain.post{
-                    Toast.makeText(this@MainActivity, " NOTIFY ", Toast.LENGTH_SHORT).show()
-                    this@MainActivity.adapter.notifyDataSetChanged()
-                }
-            }
+//            animator.callbackNotifyDataSetChanged = {
+//                binding.rvMain.post{
+//                    Toast.makeText(this@MainActivity, " NOTIFY ", Toast.LENGTH_SHORT).show()
+//                    this@MainActivity.adapter.notifyDataSetChanged()
+//                }
+//            }
             itemAnimator = animator
         }
     }
@@ -175,26 +174,25 @@ class MainActivity : AppCompatActivity() {
 
     private fun move(firstPosition: Int, secondPosition: Int) {
         binding.rvMain.post {
-            adapter.moveOne(firstPosition, secondPosition)
+            adapter.moveItem(firstPosition, secondPosition)
         }
     }
 
     private fun removeOne(position: Int) {
         binding.rvMain.post {
-            adapter.removeOne(position)
+            adapter.removeItem(position)
         }
     }
 
     private fun addOne(item: ItemModel) {
         binding.rvMain.post {
-            adapter.addOne(1, item)
+            adapter.addItem(1, item)
         }
     }
 
     private fun shuffleList() {
-        val layoutManager = binding.rvMain.layoutManager as LinearLayoutManager
         binding.rvMain.post {
-            adapter.submitDataList(mockData().subList(0, Random.nextInt(40)).toMutableList().shuffled().toList(), layoutManager.findFirstVisibleItemPosition(), layoutManager.findLastVisibleItemPosition())
+            adapter.submitList(mockData().subList(0, 30).toMutableList().shuffled().toList())
         }
     }
 }

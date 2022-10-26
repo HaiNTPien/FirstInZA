@@ -505,7 +505,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
             true
         }else {
             handler.removeCallbacks(runnable)
-            handler.postDelayed(runnable, 250)
+            handler.postDelayed(runnable, 50)
             false
         }
     }
