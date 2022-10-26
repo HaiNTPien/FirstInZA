@@ -2,6 +2,7 @@ package com.example.listwithanimation
 
 
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -13,6 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.listwithanimation.adapters.ItemModel
 import com.example.listwithanimation.adapters.MainRecyclerAdapter
 import com.example.listwithanimation.databinding.ActivityMainBinding
+import kotlinx.coroutines.delay
+import kotlin.random.Random
 
 
 class MainActivity : AppCompatActivity() {
@@ -102,11 +105,36 @@ class MainActivity : AppCompatActivity() {
 
     private fun initList() {
         val linearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        adapter.addAll(mockData().toMutableList().reversed().toList())
+        adapter.addAll(mockData().subList(0, 30).toMutableList().shuffled().toList())
         adapter.onItemClickCallback = {
-            Toast.makeText(this@MainActivity, it.toString() + " " + adapter.itemCount.toString(), Toast.LENGTH_SHORT).show()
+//            Toast.makeText(this@MainActivity, it.toString() + " " + adapter.itemCount.toString(), Toast.LENGTH_SHORT).show()
             if (inRemoveMode && it != -1) {
                 removeOne(it)
+            }else {
+                Thread {
+                    while (true) {
+                        Thread.sleep(Random.nextLong(100, 5000))
+                        removeOne(Random.nextInt(29))
+                    }
+                }.start()
+                Thread {
+                    while (true) {
+                        Thread.sleep(Random.nextLong(100, 5000))
+                        move(Random.nextInt(29), Random.nextInt(29))
+                    }
+                }.start()
+                Thread {
+                    while (true) {
+                        Thread.sleep(Random.nextLong(100, 5000))
+                        addOne(ItemModel(adapter.itemCount + 1, null, "Item " + (adapter.itemCount + 1).toString(), "Description for " + (adapter.itemCount + 1).toString(), type = 1))
+                    }
+                }.start()
+                Thread {
+                    while (true) {
+                        Thread.sleep(Random.nextLong(100, 5000))
+                        shuffleList()
+                    }
+                }.start()
             }
         }
 
@@ -146,33 +174,27 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun move(firstPosition: Int, secondPosition: Int) {
-        runOnUiThread {
+        binding.rvMain.post {
             adapter.moveOne(firstPosition, secondPosition)
         }
     }
 
     private fun removeOne(position: Int) {
-        runOnUiThread {
+        binding.rvMain.post {
             adapter.removeOne(position)
         }
     }
 
     private fun addOne(item: ItemModel) {
-        runOnUiThread {
+        binding.rvMain.post {
             adapter.addOne(1, item)
         }
     }
 
     private fun shuffleList() {
         val layoutManager = binding.rvMain.layoutManager as LinearLayoutManager
-        val list = mockData().toMutableList()
-        val item = list[3]
-        list[3] = list[2]
-        list[2] = item
-        list.removeAt(7)
-        list.add(9, ItemModel(150, null, "Item " + (150).toString(), "Description for " + (150).toString(), type = 1))
-        runOnUiThread {
-            adapter.submitDataList(list.toList(), layoutManager.findFirstCompletelyVisibleItemPosition(), layoutManager.findLastCompletelyVisibleItemPosition())
+        binding.rvMain.post {
+            adapter.submitDataList(mockData().subList(0, Random.nextInt(40)).toMutableList().shuffled().toList(), layoutManager.findFirstVisibleItemPosition(), layoutManager.findLastVisibleItemPosition())
         }
     }
 }

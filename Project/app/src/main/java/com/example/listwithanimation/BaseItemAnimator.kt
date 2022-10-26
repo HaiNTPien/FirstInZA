@@ -114,8 +114,8 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
                     return@Runnable
                 }
                 for (holder in additions) {
-                    animateAddImpl(holder)
                     addAnimations.add(holder)
+                    animateAddImpl(holder)
                 }
                 additions.clear()
             }
@@ -505,7 +505,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
             true
         }else {
             handler.removeCallbacks(runnable)
-            handler.postDelayed(runnable, 50)
+            handler.postDelayed(runnable, 250)
             false
         }
     }
@@ -534,8 +534,8 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
          
         override fun onAnimationEnd(animator: Animator) {
             clear(viewHolder.itemView)
-            dispatchRemoveFinished(viewHolder)
             removeAnimations.remove(viewHolder)
+            dispatchRemoveFinished(viewHolder)
             dispatchFinishedWhenDone()
         }
     }

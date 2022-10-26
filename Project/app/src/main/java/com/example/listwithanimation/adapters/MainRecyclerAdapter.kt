@@ -86,6 +86,7 @@ class MainRecyclerAdapter : BaseAdapter<ItemModel>() {
         return oldItem.id == newItem.id
     }
 
+
 }
 
 data class ItemModel(
