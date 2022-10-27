@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.listwithanimation.R
 import com.example.listwithanimation.databinding.ContentItemLayoutBinding
 import com.example.listwithanimation.databinding.TitleLayoutBinding
+import com.example.listwithanimation.models.ItemModel
 
 
 class MainRecyclerAdapter : BaseAdapter<ItemModel>() {
@@ -110,12 +111,3 @@ class MainRecyclerAdapter : BaseAdapter<ItemModel>() {
         setList(newList)
     }
 }
-
-data class ItemModel(
-    var id: Int,
-    var title: String? = null,
-    var name: String? = null,
-    var description: String? = null,
-    var type: Int = 0,
-    var isPivot: Boolean = false
-)

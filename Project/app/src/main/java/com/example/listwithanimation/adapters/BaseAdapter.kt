@@ -1,6 +1,7 @@
 package com.example.listwithanimation.adapters
 
 import android.os.Handler
+import android.os.Looper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -10,7 +11,7 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
 
     private var list = mutableListOf<T>()
     private lateinit var recyclerViewLayoutManager: LinearLayoutManager
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
     abstract fun areItemTheSame(oldItem: T, newItem: T): Boolean
 
     /**

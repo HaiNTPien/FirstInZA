@@ -1,8 +1,7 @@
 package com.example.listwithanimation
 
-import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.Adapter
+import com.example.listwithanimation.customanimator.BaseItemAnimator
 
 
 open class SlideInDownAnimator : BaseItemAnimator() {

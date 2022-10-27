@@ -1,9 +1,7 @@
-package com.example.listwithanimation
+package com.example.listwithanimation.view
 
 
 import android.os.Bundle
-import android.os.Handler
-import android.util.Log
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
@@ -11,23 +9,27 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.listwithanimation.adapters.ItemModel
+import com.example.listwithanimation.R
+import com.example.listwithanimation.`interface`.ListItemView
 import com.example.listwithanimation.adapters.MainRecyclerAdapter
 import com.example.listwithanimation.databinding.ActivityMainBinding
-import kotlinx.coroutines.delay
+import com.example.listwithanimation.models.ItemModel
+import com.example.listwithanimation.models.ListItemModel
+import com.example.listwithanimation.presenters.ListItemPresenters
 import kotlin.random.Random
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ListItemView.View {
     private lateinit var binding: ActivityMainBinding
     private val adapter : MainRecyclerAdapter by lazy {
         MainRecyclerAdapter()
     }
     private var inRemoveMode: Boolean = false
-
+    var presenter: ListItemPresenters? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        presenter = ListItemPresenters(this, ListItemModel())
         initList()
         initFAB()
         initItemBehavior()
@@ -88,7 +90,7 @@ class MainActivity : AppCompatActivity() {
                     binding.fabLayout.fabShuffle.startAnimation(showFab)
                     binding.fabLayout.fabShuffle.isClickable = true
                     binding.fabLayout.fabShuffle.setOnClickListener {
-                        shuffleList()
+                        presenter?.onShuffleButtonClick()
                     }
 
                 } else {
@@ -105,7 +107,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initList() {
         val linearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        adapter.addAllItem(mockData().subList(0, 30).toMutableList().shuffled().toList())
+        presenter?.onShuffleButtonClick()
         adapter.onItemClickCallback = {
 //            Toast.makeText(this@MainActivity, it.toString() + " " + adapter.itemCount.toString(), Toast.LENGTH_SHORT).show()
             if (inRemoveMode && it != -1) {
@@ -132,7 +134,7 @@ class MainActivity : AppCompatActivity() {
                 Thread {
                     while (true) {
                         Thread.sleep(Random.nextLong(100, 5000))
-                        shuffleList()
+                        presenter?.onShuffleButtonClick()
                     }
                 }.start()
             }
@@ -145,45 +147,27 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun mockData(): List<ItemModel> {
-        val list = mutableListOf<ItemModel>()
-        for(i in 0..10000) {
-            list.add(ItemModel(i + 1, null, "Item " + (i + 1).toString(), "Description for " + (i + 1).toString(), type = 1))
-        }
-        list[10000].isPivot = true
-        return list.toList()
-    }
-
-    private fun mockData2(): List<ItemModel> {
-        val list = mutableListOf<ItemModel>()
-        for(i in 0..10000) {
-            list.add(ItemModel(i + 1, null, "Item " + (i + 1).toString(), "Description for " + (i + 1).toString(), type = 1))
-        }
-        list[10000].isPivot = true
-        return list.toList()
-    }
-
-    private fun move(firstPosition: Int, secondPosition: Int) {
+    override fun move(firstPosition: Int, secondPosition: Int) {
         binding.rvMain.post {
             adapter.moveItem(firstPosition, secondPosition)
         }
     }
 
-    private fun removeOne(position: Int) {
+    override fun removeOne(position: Int) {
         binding.rvMain.post {
             adapter.removeItem(position)
         }
     }
 
-    private fun addOne(item: ItemModel) {
+    override fun addOne(item: ItemModel) {
         binding.rvMain.post {
             adapter.addItem(1, item)
         }
     }
 
-    private fun shuffleList() {
+    override fun setList(lst: List<ItemModel>) {
         binding.rvMain.post {
-            adapter.submitList(mockData().subList(0, 30).toMutableList().shuffled().toList())
+            adapter.submitList(lst.toMutableList().shuffled().toList())
         }
     }
 }

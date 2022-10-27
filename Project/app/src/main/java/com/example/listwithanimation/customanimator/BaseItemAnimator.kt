@@ -1,10 +1,14 @@
-package com.example.listwithanimation
+package com.example.listwithanimation.customanimator
 
 import android.animation.Animator
 import android.animation.Animator.AnimatorListener
 import android.os.Handler
+import android.os.Looper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
+import com.example.listwithanimation.CHANGE_DURATION
+import com.example.listwithanimation.MOVE_DURATION
+import com.example.listwithanimation.REMOVE_DURATION
 import com.example.listwithanimation.ViewHelper.clear
 
 abstract class BaseItemAnimator : SimpleItemAnimator() {
@@ -23,7 +27,7 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
     private var runnable = Runnable {
         notifyDatasetChanged()
     }
-    var handler = Handler()
+    var handler = Handler(Looper.getMainLooper())
     protected open fun notifyDatasetChanged() {}
 
     init {
@@ -325,8 +329,8 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
     }
 
     private fun endChangeAnimationIfNecessary(
-            changeInfo: ChangeInfo,
-            item: RecyclerView.ViewHolder?
+        changeInfo: ChangeInfo,
+        item: RecyclerView.ViewHolder?
     ): Boolean {
         var oldItem = false
         when {
