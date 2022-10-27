@@ -141,15 +141,6 @@ class MainActivity : AppCompatActivity() {
         binding.rvMain.apply {
             layoutManager = linearLayoutManager
             this@MainActivity.adapter.configRecyclerView(this)
-            adapter = this@MainActivity.adapter
-            val animator = SlideInDownAnimator()
-//            animator.callbackNotifyDataSetChanged = {
-//                binding.rvMain.post{
-//                    Toast.makeText(this@MainActivity, " NOTIFY ", Toast.LENGTH_SHORT).show()
-//                    this@MainActivity.adapter.notifyDataSetChanged()
-//                }
-//            }
-            itemAnimator = animator
         }
     }
 

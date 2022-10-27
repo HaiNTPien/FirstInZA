@@ -1,13 +1,11 @@
 package com.example.listwithanimation.adapters
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.example.listwithanimation.R
-import com.example.listwithanimation.SlideInDownAnimator
 import com.example.listwithanimation.databinding.ContentItemLayoutBinding
 import com.example.listwithanimation.databinding.TitleLayoutBinding
 
@@ -93,7 +91,7 @@ class MainRecyclerAdapter : BaseAdapter<ItemModel>() {
     }
 
     fun addAllItem(lst: List<ItemModel>) {
-        addAll(lst)
+        setListImmediately(lst)
     }
     fun removeItem(position: Int){
         removeOne(position)
@@ -109,7 +107,7 @@ class MainRecyclerAdapter : BaseAdapter<ItemModel>() {
     }
 
     fun submitList(newList : List<ItemModel>) {
-        submitDataList(newList)
+        setList(newList)
     }
 }
 

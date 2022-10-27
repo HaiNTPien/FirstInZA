@@ -1,7 +1,6 @@
 package com.example.listwithanimation.adapters
 
 import android.os.Handler
-import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -11,15 +10,21 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
 
     private var list = mutableListOf<T>()
     private lateinit var recyclerViewLayoutManager: LinearLayoutManager
-
+    private val handler = Handler()
     abstract fun areItemTheSame(oldItem: T, newItem: T): Boolean
 
-    protected fun addAll(lst: List<T>) {
+    /**
+     * Set new list for recyclerview immediately without animations
+     */
+    protected fun setListImmediately(lst: List<T>) {
         list.clear()
-        list.addAll(lst.reversed())
-        notifyItemRangeInserted(0, list.size)
+        list.addAll(lst)
+        notifyDataSetChanged()
     }
 
+    /**
+     * Remove an item from the list with animations
+     */
     protected fun removeOne(position: Int) {
         if (position in 0 until itemCount) {
             list.removeAt(position)
@@ -27,6 +32,9 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
         }
     }
 
+    /**
+     * Insert an item into the list at the specific position with animation
+     */
     protected fun addOne(position: Int, item: T) {
         if (position in 0 until itemCount) {
             list.add(position, item)
@@ -35,6 +43,9 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
 
     }
 
+    /**
+     * Move an item from the first position to the second position with animations
+     */
     protected fun moveOne(startPosition: Int, endPosition: Int) {
         if (startPosition in 0 until itemCount && endPosition in 0 until itemCount) {
             val item = list.removeAt(startPosition)
@@ -44,11 +55,14 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
 
     }
 
-    protected fun submitDataList(newList: List<T>) {
+    /**
+     * Set the new list with animations
+     */
+    protected fun setList(newList: List<T>) {
         val lPosition = recyclerViewLayoutManager.findLastVisibleItemPosition()
         var isChangedDataInRange = false
         if (newList.isEmpty()) {
-            addAll(listOf())
+            setListImmediately(listOf())
             return
         } else {
             if (list.size > newList.size) {
@@ -119,7 +133,7 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
                 }
             }
             if (!isChangedDataInRange) {
-                Handler().postDelayed({
+                handler.postDelayed({
                     notifyDataSetChanged()
                 }, 50)
             }
@@ -130,15 +144,22 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
 
     override fun getItemCount(): Int = list.size
 
+    /**
+     * Get current list
+     */
     protected fun getDataSource() = list
 
+    /**
+     * Set SlideInDownAnimator() animation to the adapter
+     */
     protected fun setLinearLayoutManager(rv: RecyclerView) {
         recyclerViewLayoutManager = rv.layoutManager as LinearLayoutManager
-        rv.post {
-            (rv.itemAnimator as SlideInDownAnimator).callbackNotifyDataSetChanged = {
-                notifyDataSetChanged()
-            }
+        val animator = SlideInDownAnimator()
+        rv.adapter = this
+        animator.callbackNotifyDataSetChanged = {
+            notifyDataSetChanged()
         }
+        rv.itemAnimator = animator
     }
 }
 
