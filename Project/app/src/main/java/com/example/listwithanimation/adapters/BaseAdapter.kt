@@ -1,6 +1,7 @@
 package com.example.listwithanimation.adapters
 
 import android.os.Handler
+import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -59,6 +60,7 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
      * Set the new list with animations
      */
     protected fun setList(newList: List<T>) {
+        val startTime = System.nanoTime()
         val lPosition = recyclerViewLayoutManager.findLastVisibleItemPosition()
         var isChangedDataInRange = false
         if (newList.isEmpty()) {
@@ -137,8 +139,11 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
                     notifyDataSetChanged()
                 }, 50)
             }
-        }
 
+        }
+        val endTime = System.nanoTime()
+
+        Log.d(" Time Executed ", ((endTime - startTime)/1000).toString())
     }
 
 
