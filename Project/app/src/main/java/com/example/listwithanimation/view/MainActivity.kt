@@ -16,6 +16,8 @@ import com.example.listwithanimation.databinding.ActivityMainBinding
 import com.example.listwithanimation.models.ItemModel
 import com.example.listwithanimation.models.ListItemModel
 import com.example.listwithanimation.presenters.ListItemPresenters
+import kotlinx.coroutines.delay
+import java.util.*
 import kotlin.random.Random
 
 
@@ -107,7 +109,7 @@ class MainActivity : AppCompatActivity(), ListItemView.View {
 
     private fun initList() {
         val linearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        presenter?.onShuffleButtonClick()
+        adapter.addAllItem(mockData().toList())
         adapter.onItemClickCallback = {
 //            Toast.makeText(this@MainActivity, it.toString() + " " + adapter.itemCount.toString(), Toast.LENGTH_SHORT).show()
             if (inRemoveMode && it != -1) {
@@ -147,6 +149,35 @@ class MainActivity : AppCompatActivity(), ListItemView.View {
     }
 
 
+    private fun mockData(): List<ItemModel> {
+        val list = mutableListOf<ItemModel>()
+        for(i in 0..1000) {
+            list.add(ItemModel(i + 1, null, "Item " + (i + 1).toString(), "Description for " + (i + 1).toString(), type = 1))
+        }
+        list[1000].isPivot = true
+        return list.toList()
+    }
+    private fun mockData2(): List<ItemModel> {
+        val list = mutableListOf<ItemModel>()
+        for(i in 0..200) {
+            list.add(ItemModel(i + 1, null, "Changed Item " + (i + 1).toString(), "Changed Description for " + (i + 1).toString(), type = 1))
+        }
+//        list.shuffled()
+        for(i in 201..1000) {
+            list.add(ItemModel(i + 1, null, "Item " + (i + 1).toString(), "Description for " + (i + 1).toString(), type = 1))
+        }
+        list[1000].isPivot = true
+        return list.toList()
+    }
+    private fun mockData3(): List<ItemModel> {
+        val list = mutableListOf<ItemModel>()
+        for(i in 0..10000) {
+            list.add(ItemModel(i + 1, null, "Item " + (i + 1).toString(), "Description for " + (i + 1).toString(), type = 1))
+        }
+        list[10000].isPivot = true
+        return list.toList()
+    }
+
     override fun move(firstPosition: Int, secondPosition: Int) {
         binding.rvMain.post {
             adapter.moveItem(firstPosition, secondPosition)
@@ -167,7 +198,7 @@ class MainActivity : AppCompatActivity(), ListItemView.View {
 
     override fun setList(lst: List<ItemModel>) {
         binding.rvMain.post {
-            adapter.submitList(lst.toMutableList().shuffled().toList())
+            adapter.submitList(mockData2())
         }
     }
 }

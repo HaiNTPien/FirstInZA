@@ -297,7 +297,6 @@ abstract class BaseItemAnimator : SimpleItemAnimator() {
                             dispatchChangeStarting(newHolder, false)
                         }
 
-                         
                         override fun onAnimationEnd(animator: Animator) {
                             newViewAnimation.setListener(null)
                             newView.alpha = 1f
