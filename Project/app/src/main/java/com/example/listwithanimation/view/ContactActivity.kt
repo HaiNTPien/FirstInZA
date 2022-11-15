@@ -2,21 +2,14 @@ package com.example.listwithanimation.view
 
 import android.Manifest
 import android.accounts.Account
-import android.accounts.AccountAuthenticatorResponse
-import android.accounts.AccountManager
-import android.annotation.SuppressLint
 import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.os.IBinder
-import android.provider.ContactsContract
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.listwithanimation.ContactManager
+import com.example.listwithanimation.helpers.ContactManager
 import com.example.listwithanimation.R
 import com.example.listwithanimation.SyncService
 import com.example.listwithanimation.`interface`.Contact
@@ -31,12 +24,14 @@ import com.example.listwithanimation.presenters.ContactPresenters
 class ContactActivity : AppCompatActivity(), Contact.View{
     private lateinit var binding: ActivityContactBinding
     var presenters: ContactPresenters? = null
-    var contactSyncAdapter = ContactSyncAdapter(this, true)
-    private val PERMISSIONS_REQUEST_READ_CONTACTS = 100
+    private var contactSyncAdapter = ContactSyncAdapter(this, true)
+    private val requestReadContactsPermissions = 100
+    private val requestServiceReadAndWriteContactsPermissions = 101
     private var needUpdate = false
     private var activityInForeground = true
-    var broadcastReceiver = object : BroadcastReceiver() {
+    private var broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            Log.d(" onReceive ", " onReceive ")
             if (intent != null) {
                 if (intent.hasExtra("message")) {
                     if(activityInForeground) {
@@ -58,77 +53,87 @@ class ContactActivity : AppCompatActivity(), Contact.View{
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contact)
         presenters = ContactPresenters(this, ListContactModel())
-        createAccount()
+//        createAccount()
         initListContact()
         initService()
     }
-    fun createAccount(){
-        val accountManager = AccountManager.get(this)
-        val success = accountManager.addAccountExplicitly(account, null, null)
-        val extras = intent.extras
-        if (extras != null) {
-            if (success) {  //Pass the new account back to the account manager
-                val response: AccountAuthenticatorResponse? = extras.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
-                val result = Bundle()
-                result.putString(AccountManager.KEY_ACCOUNT_NAME, "ABC")
-                result.putString(AccountManager.KEY_ACCOUNT_TYPE, "vnd.com.app.call")
-                response?.onResult(result)
-            }
-            finish()
-        }
-    }
-    @SuppressLint("Range")
-    fun handleBackFromSystemContact(){
-        val dataStr = intent.dataString
-        if (dataStr != null){
-            Log.d(" Data return ", dataStr.toString())
-            Toast.makeText(this, dataStr.toString(), Toast.LENGTH_SHORT).show()
-            val dataId = dataStr.split("/")
-//            Toast.makeText(this, adapter.getNumberByRawContactID(dataId.last()), Toast.LENGTH_SHORT).show()
-            val cursor = this.contentResolver.query(
-                dataStr.toUri(), arrayOf(
-                    ContactsContract.CommonDataKinds.Phone.NUMBER,
-                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
-                    ContactsContract.Data.SYNC1,
-                    ContactsContract.Data.SYNC2,
-                    ContactsContract.Data.SYNC3,
-                    ContactsContract.Data.SYNC4
-                ),
-                null, null, null
-            )
-            cursor?.moveToFirst()
 
-            val number =
-                cursor?.getString(cursor.getColumnIndex( ContactsContract.CommonDataKinds.Phone.NUMBER ))
-            val name =
-                cursor?.getString(cursor.getColumnIndex( ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME ))
-            val s1 =
-                cursor?.getString(cursor.getColumnIndex( ContactsContract.CommonDataKinds.Phone.SYNC1 ))
-            val s2 =
-                cursor?.getString(cursor.getColumnIndex( ContactsContract.CommonDataKinds.Phone.SYNC2 ))
-            val s3 =
-                cursor?.getString(cursor.getColumnIndex( ContactsContract.CommonDataKinds.Phone.SYNC3 ))
-            val s4 =
-                cursor?.getString(cursor.getColumnIndex( ContactsContract.CommonDataKinds.Phone.SYNC4 ))
+//    fun createAccount(){
+//        val accountManager = AccountManager.get(this)
+//        val success = accountManager.addAccountExplicitly(account, null, null)
+//        val extras = intent.extras
+//        if (extras != null) {
+//            if (success) {
+//                val response: AccountAuthenticatorResponse? = extras.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
+//                val result = Bundle()
+//                result.putString(AccountManager.KEY_ACCOUNT_NAME, "ABC")
+//                result.putString(AccountManager.KEY_ACCOUNT_TYPE, "vnd.com.app.call")
+//                response?.onResult(result)
+//            }
+//            finish()
+//        }
+//    }
 
-//            Toast.makeText(this, "$name $number $s1 $s2 $s3 $s4", Toast.LENGTH_SHORT).show()
-            cursor?.close()
-        }
-
-    }
+//    @SuppressLint("Range")
+//    fun handleBackFromSystemContact(){
+//        val dataStr = intent.dataString
+//        if (dataStr != null){
+//            Log.d(" Data return ", dataStr.toString())
+//            Toast.makeText(this, dataStr.toString(), Toast.LENGTH_SHORT).show()
+//            val dataId = dataStr.split("/")
+////            Toast.makeText(this, adapter.getNumberByRawContactID(dataId.last()), Toast.LENGTH_SHORT).show()
+//            val cursor = this.contentResolver.query(
+//                dataStr.toUri(), arrayOf(
+//                    ContactsContract.CommonDataKinds.Phone.NUMBER,
+//                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,
+//                    ContactsContract.Data.SYNC1,
+//                    ContactsContract.Data.SYNC2,
+//                    ContactsContract.Data.SYNC3,
+//                    ContactsContract.Data.SYNC4
+//                ),
+//                null, null, null
+//            )
+//            cursor?.moveToFirst()
+//
+//            val number =
+//                cursor?.getString(cursor.getColumnIndex( ContactsContract.CommonDataKinds.Phone.NUMBER ))
+//            val name =
+//                cursor?.getString(cursor.getColumnIndex( ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME ))
+//            val s1 =
+//                cursor?.getString(cursor.getColumnIndex( ContactsContract.CommonDataKinds.Phone.SYNC1 ))
+//            val s2 =
+//                cursor?.getString(cursor.getColumnIndex( ContactsContract.CommonDataKinds.Phone.SYNC2 ))
+//            val s3 =
+//                cursor?.getString(cursor.getColumnIndex( ContactsContract.CommonDataKinds.Phone.SYNC3 ))
+//            val s4 =
+//                cursor?.getString(cursor.getColumnIndex( ContactsContract.CommonDataKinds.Phone.SYNC4 ))
+//
+////            Toast.makeText(this, "$name $number $s1 $s2 $s3 $s4", Toast.LENGTH_SHORT).show()
+//            cursor?.close()
+//        }
+//
+//    }
 
     private fun initService() {
-        val serviceIntent = Intent(this, SyncService::class.java)
-        startService(serviceIntent)
-        registerReceiver()
+        if (checkSelfPermission(Manifest.permission.WRITE_CONTACTS) != PackageManager.PERMISSION_GRANTED || checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(
+                arrayOf(Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_CONTACTS),
+                requestServiceReadAndWriteContactsPermissions
+            )
+        } else {
+            val serviceIntent = Intent(this, SyncService::class.java)
+            startService(serviceIntent)
+            registerReceiver()
+
+        }
     }
 
     private fun initListContact() {
         val linearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        if (checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+        if (checkSelfPermission(Manifest.permission.WRITE_CONTACTS) != PackageManager.PERMISSION_GRANTED || checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(
-                arrayOf(Manifest.permission.WRITE_CONTACTS),
-                PERMISSIONS_REQUEST_READ_CONTACTS
+                arrayOf(Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_CONTACTS),
+                requestReadContactsPermissions
             )
         } else {
             presenters?.onClickSubmitList(this, packageManager)
@@ -144,8 +149,8 @@ class ContactActivity : AppCompatActivity(), Contact.View{
 //                    Uri.parse("tel:$it")
 //                )
 //                startActivity(intent)
-                presenters?.onClickSubmitList(this@ContactActivity, packageManager)
-//                ContactManager.deleteAllSystemContact(context)
+//                presenters?.onClickSubmitList(this@ContactActivity, packageManager)
+                ContactManager.deleteAllSystemContact(context)
             }
             this@ContactActivity.adapter.configRecyclerView(this)
         }
@@ -185,7 +190,7 @@ class ContactActivity : AppCompatActivity(), Contact.View{
         super.onResume()
         Log.d("onResume", "enter")
         if(needUpdate) {
-            Log.d("onResume", "needupdate")
+            Log.d("onResume", "need update")
             needUpdate = false
             presenters?.onClickSubmitList(this@ContactActivity, packageManager)
         }
@@ -197,26 +202,27 @@ class ContactActivity : AppCompatActivity(), Contact.View{
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSIONS_REQUEST_READ_CONTACTS) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission is granted
-                presenters?.onClickSubmitList(this, packageManager)
-            } else {
+        when(requestCode) {
+            requestReadContactsPermissions -> {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission is granted
+                    presenters?.onClickSubmitList(this, packageManager)
+                }
+            }
+            requestServiceReadAndWriteContactsPermissions -> {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    val serviceIntent = Intent(this, SyncService::class.java)
+                    startService(serviceIntent)
+                    registerReceiver()
+                }
             }
         }
+
     }
     private fun registerReceiver() {
-        //Register BroadcastReceiver
-        //to receive event from our service
         val intentFilter = IntentFilter()
         intentFilter.addAction("passMessage")
         registerReceiver(broadcastReceiver, intentFilter)
     }
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        val data = intent?.dataString
-        Log.d(" Data received ", data.toString())
-    }
-
 
 }

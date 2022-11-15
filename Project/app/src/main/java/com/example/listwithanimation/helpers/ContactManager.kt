@@ -1,4 +1,4 @@
-package com.example.listwithanimation
+package com.example.listwithanimation.helpers
 
 import android.annotation.SuppressLint
 import android.content.ContentProviderOperation
@@ -17,6 +17,8 @@ class ContactManager {
         @SuppressLint("Range", "Recycle")
         fun queryContact(contentResolver: ContentResolver): MutableList<ContactModel> {
             val lst = mutableListOf<ContactModel>()
+            val lstAllQueryResult = mutableListOf<ContactModel>()
+            val removeLst = mutableListOf<String>()
             val cur = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null)
             if (cur!!.count > 0) {
                 while (cur.moveToNext()) {
@@ -25,62 +27,86 @@ class ContactManager {
                     val number = cur.getString(cur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)) + ""
                     val accountName = cur.getString(cur.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)) + ""
                     val accountType = cur.getString(cur.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)) + ""
-                    if(itemExistInList(id, name, number, lst) != -1) {
-                        if(accountName == "abc" && accountType == "vnd.com.app.call") {
-                            lst[itemExistInList(id, name, number, lst)].isSynced = true
-                        }
-
-                    }else {
+//                    if(itemExistInList(id, name, number, lst) != -1) {
+//                        if(accountName == "abc" && accountType == "vnd.com.app.call") {
+//                            lst[itemExistInList(id, name, number, lst)].isSynced = true
+//                        }
+//
+//                    }else {
                         when(accountType) {
                             "vnd.sec.contact.phone" -> {
-                                lst.add(ContactModel(id, name, number, "From Phone", accountName, accountType))
+                                lstAllQueryResult.add(ContactModel(id, name, number, "From Phone", accountName, accountType))
                             }
                             "vnd.sec.contact.sim" -> {
-                                lst.add(ContactModel(id, name, number, "From Sim 1", accountName, accountType))
+                                lstAllQueryResult.add(ContactModel(id, name, number, "From Sim 1", accountName, accountType))
                             }
                             "vnd.sec.contact.sim2" -> {
-                                lst.add(ContactModel(id, name, number, "From Sim 2", accountName, accountType))
+                                lstAllQueryResult.add(ContactModel(id, name, number, "From Sim 2", accountName, accountType))
                             }
                             "com.google" -> {
-                                lst.add(
+                                lstAllQueryResult.add(
                                     ContactModel(id, name, number,
                                         "From Google Account : $accountName"
                                         , accountName, accountType)
                                 )
                             }
                             "com.samsung.android.exchange" -> {
-                                lst.add(
+                                lstAllQueryResult.add(
                                     ContactModel(id, name, number,
                                         "From Microsoft Account : $accountName"
                                         , accountName, accountType)
                                 )
                             }
                             "com.osp.app.signin" ->{
-                                lst.add(
+                                lstAllQueryResult.add(
                                     ContactModel(id, name, number,
                                         "From Samsung Account : $accountName"
                                         , accountName, accountType)
                                 )
                             }
-//                    else -> {
-//                        list.add(ContactModel(id, name, number,
-//                            "From Else : $accountName"
-//                            , accountName, accountType, rawContactID, userIdNoise))
-//                    }
-
-                        }
+                            "vnd.com.app.call" ->{
+                                lstAllQueryResult.add(ContactModel(id, name, number, "Custom type", accountName, accountType))
+                            }
                     }
 
 
+                }
+            }
+            var lstSize = lstAllQueryResult.size
+            var index = 0
+            while (index < lstSize) {
+                if(lstAllQueryResult[index].accountType == "vnd.com.app.call") {
+                    lstSize--
+                    val item = lstAllQueryResult.removeAt(index)
+                    lstAllQueryResult.add(item)
+                }
+                index++
+            }
+
+            for(i in lstAllQueryResult) {
+                val existItemPosition = itemExistInList(i.id, i.displayName, i.number, lst)
+                if(existItemPosition != -1) {
+                    if(i.accountName == "abc" && i.accountType == "vnd.com.app.call") {
+                        lst[existItemPosition].isSynced = true
+                    }
+                }else {
+                    if(i.accountName == "abc" && i.accountType == "vnd.com.app.call") {
+                        removeLst.add(i.id)
+                    }else {
+                        lst.add(i)
+                    }
+                }
+            }
+            if(removeLst.isNotEmpty()) {
+                for (i in removeLst) {
+                    deleteAContact(contentResolver, i)
                 }
             }
             return lst
         }
 
         private fun itemExistInList(id: String, name: String, number: String, list: List<ContactModel>) : Int {
-            return list.withIndex().windowed(1).firstOrNull() { window ->
-                window.all { it.value.displayName == name && it.value.number == number && id == it.value.id }
-            }?.first()?.index ?: -1
+            return list.withIndex().firstOrNull  { it.value.displayName == name && it.value.number == number && id == it.value.id }?.index ?: -1
         }
         @SuppressLint("Range", "Recycle")
         fun queryContactLogging(contentResolver: ContentResolver) {
@@ -128,7 +154,7 @@ class ContactManager {
                     Log.d(" Data DATA12", cur2.getString(cur2.getColumnIndex(ContactsContract.Data.DATA12)) + " ")
                     Log.d(" Data DATA13", cur2.getString(cur2.getColumnIndex(ContactsContract.Data.DATA13)) + " ")
                     Log.d(" Data DATA14", cur2.getString(cur2.getColumnIndex(ContactsContract.Data.DATA14)) + " ")
-                    Log.d(" Data DATA15", cur2.getString(cur2.getColumnIndex(ContactsContract.Data.DATA15)) + " ")
+//                    Log.d(" Data DATA15", cur2.getString(cur2.getColumnIndex(ContactsContract.Data.DATA15)) + " ")
                     Log.d(" Data CONTACT_ID", cur2.getString(cur2.getColumnIndex(ContactsContract.Data.CONTACT_ID)) + " ")
                     Log.d(" Data RAW_CONTACT_ID", cur2.getString(cur2.getColumnIndex(
                         ContactsContract.Data.RAW_CONTACT_ID)))
@@ -157,11 +183,10 @@ class ContactManager {
                         ContactsContract.Contacts.NAME_RAW_CONTACT_ID)) + " ")
                     Log.d(" Contacts NAME_RAW_CONTACT_ID", cur4.getString(cur4.getColumnIndex(
                         ContactsContract.Contacts.NAME_RAW_CONTACT_ID)) + " ")
-//                Log.d(" Contacts CONTENT_ITEM_TYPE", cur4.getString(cur4.getColumnIndex(ContactsContract.Contacts.CONTENT_ITEM_TYPE)) + " ")
                 }
             }
         }
-        private fun addCallerIsSyncAdapterParameter(uri: Uri, isSyncOperation: Boolean): Uri {
+        private fun addCallerIsSyncAdapterParameter(uri: Uri, isSyncOperation: Boolean = true): Uri {
             return if (isSyncOperation) {
                 uri.buildUpon()
                     .appendQueryParameter(ContactsContract.CALLER_IS_SYNCADAPTER, "true")
@@ -175,8 +200,7 @@ class ContactManager {
                     ops.add(
                         ContentProviderOperation.newInsert(
                             addCallerIsSyncAdapterParameter(
-                                ContactsContract.RawContacts.CONTENT_URI, true
-                            )
+                                ContactsContract.RawContacts.CONTENT_URI, true)
                         )
                             .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, "abc")
                             .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, "vnd.com.app.call")
@@ -185,54 +209,29 @@ class ContactManager {
 
                     ops.add(
                         ContentProviderOperation.newInsert(
-                            addCallerIsSyncAdapterParameter(
-                                ContactsContract.Data.CONTENT_URI,
-                                true
-                            )
+                            addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true)
                         )
                             .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                            .withValue(
-                                ContactsContract.Data.MIMETYPE,
-                                ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE
-                            )
-                            .withValue(
-                                ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME,
-                                i.displayName
-                            )
+                            .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                            .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, i.displayName)
                             .build()
                     )
                     ops.add(
                         ContentProviderOperation.newInsert(
-                            addCallerIsSyncAdapterParameter(
-                                ContactsContract.Data.CONTENT_URI,
-                                true
-                            )
+                            addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true)
                         )
                             .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                            .withValue(
-                                ContactsContract.Data.MIMETYPE,
-                                ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
-                            )
+                            .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
                             .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, i.number)
-                            .withValue(
-                                ContactsContract.CommonDataKinds.Phone.TYPE,
-                                ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE
-                            )
-                            .withValue(ContactsContract.CommonDataKinds.Phone.LABEL, "MY APP")
+                            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
                             .build()
                     )
                     ops.add(
                         ContentProviderOperation.newInsert(
-                            addCallerIsSyncAdapterParameter(
-                                ContactsContract.Data.CONTENT_URI,
-                                true
-                            )
+                            addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true)
                         )
                             .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                            .withValue(
-                                ContactsContract.Data.MIMETYPE,
-                                "vnd.android.cursor.item/vnd.com.app.call"
-                            )
+                            .withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.com.app.call")
                             .withValue(ContactsContract.Data.DATA1, i.number)
                             .withValue(ContactsContract.Data.DATA4, " Call " + i.number)
                             .withValue(ContactsContract.Data.SYNC1, i.number)
@@ -248,6 +247,20 @@ class ContactManager {
                     }
                     i.isSynced = true
                 }
+            }
+        }
+        private fun deleteAContact(contentResolver: ContentResolver, deleteId: String) {
+            val ops = ArrayList<ContentProviderOperation>()
+            ops.add(
+                ContentProviderOperation.newDelete(addCallerIsSyncAdapterParameter(ContactsContract.RawContacts.CONTENT_URI, true))
+                    .withSelection(
+                        ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", arrayOf(deleteId)).build())
+            try {
+                contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+            } catch (e: RemoteException) {
+                e.printStackTrace()
+            } catch (e: OperationApplicationException) {
+                e.printStackTrace()
             }
         }
         fun deleteAllSystemContact(context: Context) {

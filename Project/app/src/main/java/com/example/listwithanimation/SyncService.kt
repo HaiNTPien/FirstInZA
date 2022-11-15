@@ -1,15 +1,14 @@
 package com.example.listwithanimation
 
-import android.app.Activity
 import android.app.Service
 import android.content.Intent
 import android.database.ContentObserver
-import android.os.Binder
 import android.os.IBinder
 import android.provider.ContactsContract
 import android.util.Log
-import android.widget.Toast
+import com.example.listwithanimation.`interface`.Contact
 import com.example.listwithanimation.adapters.ContactSyncAdapter
+import com.example.listwithanimation.helpers.ContactManager
 
 
 class SyncService : Service() {
@@ -19,6 +18,7 @@ class SyncService : Service() {
         contentResolver.registerContentObserver(ContactsContract.Contacts.CONTENT_URI, true, object : ContentObserver(null) {
             override fun onChange(selfChange: Boolean) {
                 super.onChange(selfChange)
+                ContactManager.syncContact(contentResolver, ContactManager.queryContact(contentResolver))
                 Log.d("OnChanged Data", "OnChanged Data")
                 passMessageToActivity("needUpdate")
             }
@@ -35,9 +35,9 @@ class SyncService : Service() {
     }
 
     fun passMessageToActivity(needUpdate : String){
-        var intent = Intent()
-        intent.setAction("passMessage");
-        intent.putExtra("message", needUpdate);
-        sendBroadcast(intent);
+        val intent = Intent()
+        intent.action = "passMessage"
+        intent.putExtra("message", needUpdate)
+        sendBroadcast(intent)
     }
 }

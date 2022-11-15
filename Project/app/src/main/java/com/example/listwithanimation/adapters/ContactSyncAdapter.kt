@@ -73,7 +73,7 @@ class ContactSyncAdapter: AbstractThreadedSyncAdapter {
         provider: ContentProviderClient?,
         syncResult: SyncResult?
     ) {
-        ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true)
+//        ContentResolver.setSyncAutomatically(account, ContactsContract.AUTHORITY, true)
     }
 
 }
