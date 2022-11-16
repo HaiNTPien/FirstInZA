@@ -20,7 +20,7 @@ class ContactAdapter : BaseAdapter<ContactModel>() {
         Log.d(" areItemTheSame new ", (newItem.displayName).toString())
         Log.d(" areItemTheSame old ", (oldItem.number).toString())
         Log.d(" areItemTheSame new ", (newItem.number).toString())
-        return oldItem.displayName == newItem.displayName && oldItem.number == newItem.number
+        return oldItem.displayName == newItem.displayName && oldItem.number == newItem.number && oldItem.id == newItem.id
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {

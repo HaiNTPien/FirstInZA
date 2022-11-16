@@ -19,6 +19,7 @@ class ContactManager {
             val lst = mutableListOf<ContactModel>()
             val lstAllQueryResult = mutableListOf<ContactModel>()
             val removeLst = mutableListOf<String>()
+            val updateLst = mutableListOf<Triple<String, String, String>>()
             val cur = contentResolver.query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null)
             if (cur!!.count > 0) {
                 while (cur.moveToNext()) {
@@ -27,6 +28,7 @@ class ContactManager {
                     val number = cur.getString(cur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)) + ""
                     val accountName = cur.getString(cur.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME)) + ""
                     val accountType = cur.getString(cur.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE)) + ""
+                    val rawContactId = cur.getString(cur.getColumnIndex(ContactsContract.RawContacts._ID)) + ""
 //                    if(itemExistInList(id, name, number, lst) != -1) {
 //                        if(accountName == "abc" && accountType == "vnd.com.app.call") {
 //                            lst[itemExistInList(id, name, number, lst)].isSynced = true
@@ -35,53 +37,53 @@ class ContactManager {
 //                    }else {
                         when(accountType) {
                             "vnd.sec.contact.phone" -> {
-                                lstAllQueryResult.add(ContactModel(id, name, number, "From Phone", accountName, accountType))
+                                lstAllQueryResult.add(0, ContactModel(id, name, number, "From Phone", accountName, accountType, rawContactId = rawContactId))
                             }
                             "vnd.sec.contact.sim" -> {
-                                lstAllQueryResult.add(ContactModel(id, name, number, "From Sim 1", accountName, accountType))
+                                lstAllQueryResult.add(0, ContactModel(id, name, number, "From Sim 1", accountName, accountType, rawContactId = rawContactId))
                             }
                             "vnd.sec.contact.sim2" -> {
-                                lstAllQueryResult.add(ContactModel(id, name, number, "From Sim 2", accountName, accountType))
+                                lstAllQueryResult.add(0, ContactModel(id, name, number, "From Sim 2", accountName, accountType, rawContactId = rawContactId))
                             }
                             "com.google" -> {
-                                lstAllQueryResult.add(
+                                lstAllQueryResult.add(0 ,
                                     ContactModel(id, name, number,
                                         "From Google Account : $accountName"
-                                        , accountName, accountType)
+                                        , accountName, accountType, rawContactId = rawContactId)
                                 )
                             }
                             "com.samsung.android.exchange" -> {
-                                lstAllQueryResult.add(
+                                lstAllQueryResult.add(0,
                                     ContactModel(id, name, number,
                                         "From Microsoft Account : $accountName"
-                                        , accountName, accountType)
+                                        , accountName, accountType, rawContactId = rawContactId)
                                 )
                             }
                             "com.osp.app.signin" ->{
-                                lstAllQueryResult.add(
+                                lstAllQueryResult.add(0 ,
                                     ContactModel(id, name, number,
                                         "From Samsung Account : $accountName"
-                                        , accountName, accountType)
+                                        , accountName, accountType, rawContactId = rawContactId)
                                 )
                             }
                             "vnd.com.app.call" ->{
-                                lstAllQueryResult.add(ContactModel(id, name, number, "Custom type", accountName, accountType))
+                                lstAllQueryResult.add(ContactModel(id, name, number, "Custom type", accountName, accountType, rawContactId = rawContactId))
                             }
                     }
 
 
                 }
             }
-            var lstSize = lstAllQueryResult.size
-            var index = 0
-            while (index < lstSize) {
-                if(lstAllQueryResult[index].accountType == "vnd.com.app.call") {
-                    lstSize--
-                    val item = lstAllQueryResult.removeAt(index)
-                    lstAllQueryResult.add(item)
-                }
-                index++
-            }
+//            var lstSize = lstAllQueryResult.size
+//            var index = 0
+//            while (index < lstSize) {
+//                if(lstAllQueryResult[index].accountType == "vnd.com.app.call") {
+//                    lstSize--
+//                    val item = lstAllQueryResult.removeAt(index)
+//                    lstAllQueryResult.add(item)
+//                }
+//                index++
+//            }
 
             for(i in lstAllQueryResult) {
                 val existItemPosition = itemExistInList(i.id, i.displayName, i.number, lst)
@@ -91,10 +93,21 @@ class ContactManager {
                     }
                 }else {
                     if(i.accountName == "abc" && i.accountType == "vnd.com.app.call") {
-                        removeLst.add(i.id)
+                        val itemNeedUpdate = isItemNeedUpdate(i.id, lst)
+                        if(itemNeedUpdate != -1) {
+//                            removeLst.add(i.id)
+                            updateLst.add(Triple(i.rawContactId, lst[itemNeedUpdate].number, lst[itemNeedUpdate].displayName))
+                        }else {
+                            removeLst.add(i.id)
+                        }
                     }else {
                         lst.add(i)
                     }
+                }
+            }
+            if(updateLst.isNotEmpty()) {
+                for (i in updateLst) {
+                    updateRawContact(contentResolver, i.first, i.second, i.third)
                 }
             }
             if(removeLst.isNotEmpty()) {
@@ -102,9 +115,12 @@ class ContactManager {
                     deleteAContact(contentResolver, i)
                 }
             }
+            Log.d(" return List ", lst.size.toString())
             return lst
         }
-
+        private fun isItemNeedUpdate(id: String, list: List<ContactModel>) : Int {
+            return list.withIndex().firstOrNull  { id == it.value.id }?.index ?: -1
+        }
         private fun itemExistInList(id: String, name: String, number: String, list: List<ContactModel>) : Int {
             return list.withIndex().firstOrNull  { it.value.displayName == name && it.value.number == number && id == it.value.id }?.index ?: -1
         }
@@ -255,6 +271,35 @@ class ContactManager {
                 ContentProviderOperation.newDelete(addCallerIsSyncAdapterParameter(ContactsContract.RawContacts.CONTENT_URI, true))
                     .withSelection(
                         ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = ?", arrayOf(deleteId)).build())
+            try {
+                contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+            } catch (e: RemoteException) {
+                e.printStackTrace()
+            } catch (e: OperationApplicationException) {
+                e.printStackTrace()
+            }
+        }
+        private fun updateRawContact(contentResolver: ContentResolver, rawContactId: String, number: String, name: String) {
+            val ops = ArrayList<ContentProviderOperation>()
+            ops.add(
+                ContentProviderOperation.newUpdate(
+                    addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true)
+                )
+                    .withSelection(ContactsContract.Data.RAW_CONTACT_ID + " =? ", arrayOf(rawContactId))
+                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
+                    .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name)
+                    .build()
+            )
+            ops.add(
+                ContentProviderOperation.newUpdate(
+                    addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true)
+                )
+                    .withSelection(ContactsContract.Data.RAW_CONTACT_ID + " =? ", arrayOf(rawContactId))
+                    .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, number)
+                    .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+                    .build()
+            )
             try {
                 contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
             } catch (e: RemoteException) {

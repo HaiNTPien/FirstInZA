@@ -137,7 +137,7 @@ class ContactActivity : AppCompatActivity(), Contact.View{
             )
         } else {
             presenters?.onClickSubmitList(this, packageManager)
-            contactSyncAdapter.onPerformSync(account, null, null, null, null)
+//            contactSyncAdapter.onPerformSync(account, null, null, null, null)
 
         }
 //        presenters?.onClickSubmitList(this)
@@ -205,7 +205,6 @@ class ContactActivity : AppCompatActivity(), Contact.View{
         when(requestCode) {
             requestReadContactsPermissions -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission is granted
                     presenters?.onClickSubmitList(this, packageManager)
                 }
             }

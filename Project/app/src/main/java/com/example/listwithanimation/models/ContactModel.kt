@@ -16,6 +16,7 @@ data class ContactModel(
     var accountName: String,
     var accountType: String,
     var sectionLabel: String? = null,
+    var rawContactId: String,
     var isSynced: Boolean = false
 )
 
@@ -25,9 +26,9 @@ class ListContactModel : Contact.Model {
 
     @SuppressLint("Range", "Recycle")
     override fun retrievePhoneContact(context: Context, packageManager: PackageManager) {
-        Log.d(" Phase ", " 1 ")
+//        Log.d(" Phase ", " 1 ")
         val cr = context.contentResolver
-        ContactManager.queryContactLogging(cr)
+//        ContactManager.queryContactLogging(cr)
         updateList(ContactManager.queryContact(cr).distinctBy { it.id })
         ContactManager.syncContact(cr, getListContactDistinct(false))
 
@@ -89,14 +90,14 @@ class ListContactModel : Contact.Model {
                     lst.removeAt(i + 1)
                 }
                 previousLabel = "#"
-                lst.add(i, ContactModel("", "", "", "", "", "",  previousLabel))
+                lst.add(i, ContactModel("", "", "", "", "", "",  previousLabel, ""))
             } else {
                 if (previousLabel != lst[i].displayName.substring(0, 1).uppercase(Locale.ROOT)) {
                     previousLabel = lst[i].displayName.substring(0, 1).uppercase(Locale.ROOT)
-                    lst.add(i, ContactModel("", "", "", "", "", "",  previousLabel))
+                    lst.add(i, ContactModel("", "", "", "", "", "",  previousLabel, ""))
                 } else {
                     lst.removeAt(i + 1)
-                    lst.add(i, ContactModel("", "", "", "", "", "",  previousLabel))
+                    lst.add(i, ContactModel("", "", "", "", "", "",  previousLabel, ""))
                 }
             }
 
