@@ -16,9 +16,12 @@ import com.example.listwithanimation.`interface`.Contact
 import com.example.listwithanimation.adapters.ContactAdapter
 import com.example.listwithanimation.adapters.ContactSyncAdapter
 import com.example.listwithanimation.databinding.ActivityContactBinding
+import com.example.listwithanimation.helpers.SharePreferences
+import com.example.listwithanimation.helpers.SharePreferences.set
 import com.example.listwithanimation.models.ContactModel
 import com.example.listwithanimation.models.ListContactModel
 import com.example.listwithanimation.presenters.ContactPresenters
+import com.google.gson.Gson
 
 
 class ContactActivity : AppCompatActivity(), Contact.View{
@@ -48,7 +51,6 @@ class ContactActivity : AppCompatActivity(), Contact.View{
         ContactAdapter()
     }
     private val account = Account("ABC", "vnd.com.app.call")
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contact)

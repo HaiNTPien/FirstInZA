@@ -6,6 +6,10 @@ import android.content.pm.PackageManager
 import android.util.Log
 import com.example.listwithanimation.helpers.ContactManager
 import com.example.listwithanimation.`interface`.Contact
+import com.example.listwithanimation.helpers.SharePreferences
+import com.example.listwithanimation.helpers.SharePreferences.get
+import com.example.listwithanimation.helpers.SharePreferences.set
+import com.google.gson.Gson
 import java.util.*
 
 data class ContactModel(
@@ -17,7 +21,20 @@ data class ContactModel(
     var accountType: String,
     var sectionLabel: String? = null,
     var rawContactId: String,
-    var isSynced: Boolean = false
+    var isSynced: Boolean = false,
+    var isSyncLogged:  Boolean = false
+)
+enum class ActionContact{
+    ADD_CONTACT,
+    DELETE_CONTACT,
+    UPDATE_CONTACT,
+    SYNC_CONTACT
+}
+data class LogModel(
+    var id: String? = null,
+    var action: ActionContact,
+    var contactId: String,
+    var message: String? = null
 )
 
 class ListContactModel : Contact.Model {
@@ -29,11 +46,20 @@ class ListContactModel : Contact.Model {
 //        Log.d(" Phase ", " 1 ")
         val cr = context.contentResolver
 //        ContactManager.queryContactLogging(cr)
-        updateList(ContactManager.queryContact(cr).distinctBy { it.id })
-        ContactManager.syncContact(cr, getListContactDistinct(false))
-
-        Log.d(" Phase ", " 2 ")
-        ContactManager.queryContactLogging(cr)
+        val sharePref = SharePreferences.defaultPrefs(context)
+        val lst: List<ContactModel> = ContactManager.queryContact(cr, context).first.distinctBy { it.id }
+//        }else {
+//            lst = Gson().fromJson(sharePref.getString("contacts", null), Array<ContactModel>::class.java).toList()
+//            Log.d("contact data ", "load from share pref")
+//        }
+        updateList(lst)
+        ContactManager.syncContact(context, getListContactDistinct(false))
+        if(sharePref.getString("contacts", null) == null) {
+            sharePref["contacts"] = Gson().toJson(lst)
+        }
+//        ContactManager.logChangeInContact(lst.toMutableList(), context)
+//        Log.d("Phase ", " 2 ")
+//        ContactManager.queryContactLogging(cr)
 
     }
 
@@ -76,6 +102,12 @@ class ListContactModel : Contact.Model {
         }else {
             returnList.toList()
         }
+    }
+
+    override fun getContactByID(id: String): ContactModel? {
+        val position = list.withIndex().firstOrNull  { id == it.value.id }?.index ?: -1
+        return if(position != -1 )  list[position] else
+            null
     }
 
     private fun String.onlyLetters() = all { it.isLetter() }

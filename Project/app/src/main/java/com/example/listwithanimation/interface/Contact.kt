@@ -23,5 +23,6 @@ interface Contact {
         fun retrievePhoneContact(context: Context, packageManager: PackageManager)
         fun getListContact(withSectionLabel: Boolean): List<ContactModel>
         fun getListContactDistinct(withSectionLabel: Boolean): List<ContactModel>
+        fun getContactByID(id: String): ContactModel?
     }
 }
