@@ -13,6 +13,7 @@ import com.example.listwithanimation.models.ContactModel
 import com.example.listwithanimation.models.LogModel
 
 class LoggingAdapter: BaseAdapter<LogModel>() {
+    var onItemClickCallback: (() -> Unit)? = null
     override fun areItemTheSame(oldItem: LogModel, newItem: LogModel): Boolean {
         return oldItem == newItem
     }
@@ -36,6 +37,9 @@ class LoggingAdapter: BaseAdapter<LogModel>() {
             binding.root.translationZ = 4F
             binding.tvAction.text = ActionContact.getEnum(item.action)
             binding.tvDescription.text = item.message.toString()
+            binding.root.setOnClickListener {
+                onItemClickCallback?.invoke()
+            }
         }
     }
     fun submitList(newList: List<LogModel>) {

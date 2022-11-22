@@ -117,32 +117,14 @@ class ContactFragment : Fragment(), Contact.View {
 
     private fun initListContact() {
         val linearLayoutManager = LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false)
-        if (checkSelfPermission(requireActivity(), Manifest.permission.WRITE_CONTACTS) != PackageManager.PERMISSION_GRANTED || checkSelfPermission(
-                requireActivity(), Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(
-                arrayOf(Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_CONTACTS),
-                requestReadContactsPermissions
-            )
-        } else {
-            presenters?.onClickSubmitList(requireActivity(), requireActivity().packageManager)
-//            contactSyncAdapter.onPerformSync(account, null, null, null, null)
-
-        }
-//        presenters?.onClickSubmitList(this)
         binding.rvContact.apply {
             layoutManager = linearLayoutManager
             this@ContactFragment.adapter.onItemClickCallback = {
-//                val intent = Intent(
-//                    Intent.ACTION_DIAL,
-//                    Uri.parse("tel:$it")
-//                )
-//                startActivity(intent)
-//                presenters?.onClickSubmitList(this@ContactActivity, packageManager)
                 ContactManager.deleteAllSystemContact(context)
             }
             this@ContactFragment.adapter.configRecyclerView(this)
         }
-
+        updateContactList(requireActivity(), requireActivity().packageManager)
 
     }
 

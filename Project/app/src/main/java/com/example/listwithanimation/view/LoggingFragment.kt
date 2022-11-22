@@ -17,13 +17,14 @@ import com.example.listwithanimation.databinding.LoggingItemLayoutBinding
 import com.example.listwithanimation.helpers.ContactManager
 import com.example.listwithanimation.helpers.SharePreferences
 import com.example.listwithanimation.helpers.SharePreferences.get
+import com.example.listwithanimation.helpers.SharePreferences.set
 import com.example.listwithanimation.models.LogModel
 import com.google.gson.Gson
 
 class LoggingFragment : Fragment() {
-    lateinit var binding : FragmentLoggingBinding
+    lateinit var binding: FragmentLoggingBinding
     private lateinit var adapter: LoggingAdapter
-    private lateinit var sharePref : SharedPreferences
+    private lateinit var sharePref: SharedPreferences
     private var isRecyclerViewInit = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,19 +47,26 @@ class LoggingFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
     }
+
     fun initRecyclerView() {
-        val linearLayoutManager = LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false)
+        val linearLayoutManager =
+            LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false)
         adapter = LoggingAdapter()
         binding.rvLogging.apply {
             layoutManager = linearLayoutManager
             this@LoggingFragment.adapter.configRecyclerView(this)
+            this@LoggingFragment.adapter.onItemClickCallback = {
+                sharePref["dataLog"] = Gson().toJson(listOf<LogModel>())
+                updateLoggingList()
+            }
         }
         updateLoggingList()
     }
+
     override fun onResume() {
         super.onResume()
         Log.d(" LoggingFragment ", " updateLoggingList ")
-        if(isRecyclerViewInit) {
+        if (isRecyclerViewInit) {
             updateLoggingList()
         }
     }
@@ -66,18 +74,23 @@ class LoggingFragment : Fragment() {
     private fun updateLoggingList() {
         val loggingList = sharePref["dataLog", ""]
         binding.rvLogging.post {
-            if(Gson().fromJson(loggingList, Array<LogModel>::class.java) == null) {
+            if (Gson().fromJson(loggingList, Array<LogModel>::class.java) == null) {
                 adapter.submitList(listOf<LogModel>())
-            }else {
-                Log.d(" LoggingFragment ", Gson().fromJson(loggingList, Array<LogModel>::class.java).toList().toString() )
-                adapter.submitList(Gson().fromJson(loggingList, Array<LogModel>::class.java).toList())
+            } else {
+                Log.d(
+                    " LoggingFragment ",
+                    Gson().fromJson(loggingList, Array<LogModel>::class.java).toList().toString()
+                )
+                adapter.submitList(
+                    Gson().fromJson(loggingList, Array<LogModel>::class.java).toList()
+                )
             }
         }
     }
 
     override fun setUserVisibleHint(isVisibleToUser: Boolean) {
         super.setUserVisibleHint(isVisibleToUser)
-        if(isResumed && !isRecyclerViewInit) {
+        if (isResumed && !isRecyclerViewInit) {
             initRecyclerView()
             isRecyclerViewInit = true
             requireActivity().runOnUiThread {

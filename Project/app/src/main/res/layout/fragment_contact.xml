@@ -9,7 +9,6 @@
             android:id="@+id/rvContact"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingBottom="50dp"
             android:layoutAnimation="@anim/recycler_animation"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
             app:layout_constraintTop_toTopOf="parent"/>

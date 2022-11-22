@@ -130,7 +130,6 @@ class ContactActivity : AppCompatActivity(){
             val serviceIntent = Intent(this, SyncService::class.java)
             startService(serviceIntent)
             registerReceiver()
-
         }
     }
 }
