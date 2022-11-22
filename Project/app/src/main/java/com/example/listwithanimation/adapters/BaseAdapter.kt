@@ -2,6 +2,7 @@ package com.example.listwithanimation.adapters
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -62,6 +63,8 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
     protected fun setList(newList: List<T>) {
         val lPosition = recyclerViewLayoutManager.findLastVisibleItemPosition()
         var isChangedDataInRange = false
+        Log.d(" BaseAdapter " , " oldList ${list.size}")
+        Log.d(" BaseAdapter " , " newList ${newList.size}")
         if (newList.isEmpty()) {
             setListImmediately(listOf())
             return

@@ -141,7 +141,7 @@ class ContactManager {
                     if(itemExistInList(oldLst[i].id, newList) == -1){
                         //add Remove Contact Log
 //                        Log.d("Oldlist remove", "${oldLst[i].id} ${oldLst[i].displayName} ${oldLst[i].number} " )
-                        oldLog.add(LogModel(id = null, ActionContact.DELETE_CONTACT, oldLst[i].id, "Remove contact ${oldLst[i].displayName}"))
+                        oldLog.add(LogModel(id = null, ActionContact.DELETE_CONTACT, oldLst[i].id, "Remove contact ${oldLst[i].displayName} with number phone: ${oldLst[i].number}"))
                         oldLst.removeAt(i)
                     }
                 }
@@ -155,7 +155,7 @@ class ContactManager {
                         oldLst.add(i)
 
                         if(!i.isSyncLogged && i.isSynced) {
-                            oldLog.add(LogModel(null, ActionContact.SYNC_CONTACT, i.id, "Synced contact ${i.displayName} "))
+                            oldLog.add(LogModel(null, ActionContact.SYNC_CONTACT, i.id, "Synced contact ${i.displayName} with number phone: ${i.number} "))
                             i.isSyncLogged = true
                         }
                     }else {
@@ -175,7 +175,7 @@ class ContactManager {
                 for(i in newList) {
                     log.add(LogModel(id = null, ActionContact.ADD_CONTACT, i.id, "Add contact ${i.displayName} with number phone: ${i.number}"))
                     if(!i.isSyncLogged && i.isSynced) {
-                        log.add(LogModel(null, ActionContact.SYNC_CONTACT, i.id, "Synced contact ${i.displayName} "))
+                        log.add(LogModel(null, ActionContact.SYNC_CONTACT, i.id, "Synced contact ${i.displayName} with number phone: ${i.number}"))
                         i.isSyncLogged = true
                     }
                 }

@@ -22,14 +22,27 @@ data class ContactModel(
     var sectionLabel: String? = null,
     var rawContactId: String,
     var isSynced: Boolean = false,
-    var isSyncLogged:  Boolean = false
+    var isSyncLogged: Boolean = false
 )
-enum class ActionContact{
+
+enum class ActionContact {
     ADD_CONTACT,
     DELETE_CONTACT,
     UPDATE_CONTACT,
-    SYNC_CONTACT
+    SYNC_CONTACT;
+    companion object {
+        fun getEnum(value: ActionContact): String {
+            return when(value) {
+                ADD_CONTACT -> "Add Contact"
+                DELETE_CONTACT -> "Delete Contact"
+                UPDATE_CONTACT -> "Update Contact"
+                SYNC_CONTACT -> "Sync Contact"
+                else -> "Unknown"
+            }
+        }
+    }
 }
+
 data class LogModel(
     var id: String? = null,
     var action: ActionContact,
@@ -47,15 +60,19 @@ class ListContactModel : Contact.Model {
         val cr = context.contentResolver
 //        ContactManager.queryContactLogging(cr)
         val sharePref = SharePreferences.defaultPrefs(context)
-        val lst: List<ContactModel> = ContactManager.queryContact(cr, context).first.distinctBy { it.id }
+        val lst: List<ContactModel> =
+            ContactManager.queryContact(cr, context).first.distinctBy { it.id }
 //        }else {
 //            lst = Gson().fromJson(sharePref.getString("contacts", null), Array<ContactModel>::class.java).toList()
 //            Log.d("contact data ", "load from share pref")
 //        }
         updateList(lst)
         ContactManager.syncContact(context, getListContactDistinct(false))
-        if(sharePref.getString("contacts", null) == null) {
+        if (sharePref.getString("contacts", null) == null) {
             sharePref["contacts"] = Gson().toJson(lst)
+        }
+        if (sharePref.getString("dataLog", null) == null) {
+            sharePref["dataLog"] = Gson().toJson(listOf<LogModel>())
         }
 //        ContactManager.logChangeInContact(lst.toMutableList(), context)
 //        Log.d("Phase ", " 2 ")
@@ -63,50 +80,52 @@ class ListContactModel : Contact.Model {
 
     }
 
-    fun updateList(newList : List<ContactModel>) {
-        for(i in list.size - 1 downTo  0) {
-            if(!itemExistInList(list[i], newList)){
+    fun updateList(newList: List<ContactModel>) {
+        for (i in list.size - 1 downTo 0) {
+            if (!itemExistInList(list[i], newList)) {
                 list.removeAt(i)
             }
         }
-        for(i in newList) {
-            if(!itemExistInList(i, list)){
+        for (i in newList) {
+            if (!itemExistInList(i, list)) {
                 list.add(i)
             }
         }
     }
-    private fun itemExistInList(item: ContactModel, list: List<ContactModel>) : Boolean {
+
+    private fun itemExistInList(item: ContactModel, list: List<ContactModel>): Boolean {
         return list.any { it.displayName == item.displayName && it.number == item.number }
     }
+
     override fun getListContact(withSectionLabel: Boolean): List<ContactModel> {
-        val returnList = list.sortedBy{
+        val returnList = list.sortedBy {
             it.displayName.lowercase(
                 Locale.ROOT
             )
         }.toMutableList()
-        return if(withSectionLabel) {
+        return if (withSectionLabel) {
             addLabelSection(returnList).toList()
-        }else {
+        } else {
             returnList.toList()
         }
     }
 
     override fun getListContactDistinct(withSectionLabel: Boolean): List<ContactModel> {
-        val returnList = list.distinctBy { it.id }.sortedBy{
+        val returnList = list.distinctBy { it.id }.sortedBy {
             it.displayName.lowercase(
                 Locale.ROOT
             )
         }.toMutableList()
-        return if(withSectionLabel) {
+        return if (withSectionLabel) {
             addLabelSection(returnList).toList()
-        }else {
+        } else {
             returnList.toList()
         }
     }
 
     override fun getContactByID(id: String): ContactModel? {
-        val position = list.withIndex().firstOrNull  { id == it.value.id }?.index ?: -1
-        return if(position != -1 )  list[position] else
+        val position = list.withIndex().firstOrNull { id == it.value.id }?.index ?: -1
+        return if (position != -1) list[position] else
             null
     }
 
@@ -122,14 +141,14 @@ class ListContactModel : Contact.Model {
                     lst.removeAt(i + 1)
                 }
                 previousLabel = "#"
-                lst.add(i, ContactModel("", "", "", "", "", "",  previousLabel, ""))
+                lst.add(i, ContactModel("", "", "", "", "", "", previousLabel, ""))
             } else {
                 if (previousLabel != lst[i].displayName.substring(0, 1).uppercase(Locale.ROOT)) {
                     previousLabel = lst[i].displayName.substring(0, 1).uppercase(Locale.ROOT)
-                    lst.add(i, ContactModel("", "", "", "", "", "",  previousLabel, ""))
+                    lst.add(i, ContactModel("", "", "", "", "", "", previousLabel, ""))
                 } else {
                     lst.removeAt(i + 1)
-                    lst.add(i, ContactModel("", "", "", "", "", "",  previousLabel, ""))
+                    lst.add(i, ContactModel("", "", "", "", "", "", previousLabel, ""))
                 }
             }
 

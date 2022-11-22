@@ -3,14 +3,13 @@ package com.example.listwithanimation.helpers
 import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
+import com.google.gson.Gson
 
 
 object SharePreferences {
     fun defaultPrefs(context: Context): SharedPreferences
             = PreferenceManager.getDefaultSharedPreferences(context)
 
-    fun customPrefs(context: Context, name: String): SharedPreferences
-            = context.getSharedPreferences(name, Context.MODE_PRIVATE)
 
     private inline fun SharedPreferences.edit(operation: (SharedPreferences.Editor) -> Unit) {
         val editor = this.edit()
@@ -36,5 +35,15 @@ object SharePreferences {
         Float::class -> getFloat(key, defaultValue as? Float ?: -1f) as T
         Long::class -> getLong(key, defaultValue as? Long ?: -1) as T
         else -> throw UnsupportedOperationException("Not yet implemented")
+    }
+
+    fun<T> SharedPreferences.setList(key: String, value: T) {
+        edit {
+            it.putString(key, Gson().toJson(value))
+        }
+    }
+
+    inline fun<reified T : Any> SharedPreferences.getList(key: String): List<T> {
+        return Gson().fromJson(getString(key, ""), Array<T>::class.java).toList()
     }
 }
