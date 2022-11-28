@@ -11,9 +11,10 @@ import com.example.listwithanimation.databinding.ContentItemLayoutBinding
 import com.example.listwithanimation.databinding.SectionItemLayoutBinding
 import com.example.listwithanimation.models.ContactModel
 import com.example.listwithanimation.models.ItemModel
+import com.example.listwithanimation.models.PhoneInContactModel
 
 class ContactAdapter : BaseAdapter<ContactModel>() {
-    var onItemClickCallback: ((String) -> Unit)? = null
+    var onItemClickCallback: ((ContactModel) -> Unit)? = null
 
     override fun areItemTheSame(oldItem: ContactModel, newItem: ContactModel): Boolean {
         Log.d(" areItemTheSame old ", (oldItem.displayName).toString())
@@ -66,10 +67,18 @@ class ContactAdapter : BaseAdapter<ContactModel>() {
         fun bind(item: ContactModel) {
             binding.root.translationZ = 4F
             binding.tvName.text = item.displayName
-            binding.tvPhoneNumber.text = item.number
+            var displayNumberPhone = ""
+            for (i in 0 until item.number.size) {
+                displayNumberPhone += if(i == item.number.size - 1) {
+                    "${PhoneInContactModel.getTypeName(item.number[i].phoneLabel)}: ${item.number[i].number}"
+                }else {
+                    "${PhoneInContactModel.getTypeName(item.number[i].phoneLabel)}: ${item.number[i].number}\n"
+                }
+            }
+            binding.tvPhoneNumber.text = displayNumberPhone
             binding.tvFrom.text = item.type
             binding.root.setOnClickListener {
-                onItemClickCallback?.invoke(item.number.toString())
+                onItemClickCallback?.invoke(item)
             }
 
         }

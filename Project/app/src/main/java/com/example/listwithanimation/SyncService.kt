@@ -10,7 +10,6 @@ import android.os.Looper
 import android.provider.ContactsContract
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.example.listwithanimation.`interface`.Contact
 import com.example.listwithanimation.adapters.ContactSyncAdapter
 import com.example.listwithanimation.helpers.ContactManager
 import com.example.listwithanimation.helpers.SharePreferences
@@ -22,18 +21,18 @@ class SyncService : Service() {
     private lateinit var mSyncAdapter: ContactSyncAdapter
     private var handler = Handler(Looper.getMainLooper())
     private var runnable = Runnable {
-        val lst = ContactManager.queryContact(contentResolver, this@SyncService)
+        val lst = ContactManager.queryContact(contentResolver)
 //                sharePref["contacts"] = Gson().toJson(lst)
 //        if(!ContactManager.syncContact(context = this@SyncService, lst)) {
         if (lst.second) {
             Log.d(" Handler ", " Sync contact")
             ContactManager.syncContact(context = this@SyncService, lst.first.distinctBy { it.id })
         }else {
-            Log.d(" Handler ", " Logging ")
-            ContactManager.logChangeInContact(
-                context = this@SyncService,
-                newList = lst.first.distinctBy { it.id }.toMutableList()
-            )
+        Log.d(" Handler ", " Logging ")
+        ContactManager.logChangeInContact(
+            context = this@SyncService,
+            newList = lst.first.distinctBy { it.id }.toMutableList()
+        )
         }
         passMessageToActivity("needUpdate")
     }

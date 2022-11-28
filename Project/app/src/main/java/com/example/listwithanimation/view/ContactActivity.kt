@@ -1,6 +1,9 @@
 package com.example.listwithanimation.view
 
 import android.Manifest
+import android.accounts.Account
+import android.accounts.AccountAuthenticatorResponse
+import android.accounts.AccountManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -9,11 +12,12 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.fragment.app.FragmentTransaction
+import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import com.example.listwithanimation.R
 import com.example.listwithanimation.SyncService
 import com.example.listwithanimation.adapters.ViewPagerAdapter
 import com.example.listwithanimation.databinding.ActivityContactBinding
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 
 
@@ -21,9 +25,11 @@ class ContactActivity : AppCompatActivity(){
     private lateinit var binding: ActivityContactBinding
     private lateinit var viewPagerAdapter: ViewPagerAdapter
     private var needUpdate = false
+    private lateinit var navigation : BottomNavigationView
     private var activityInForeground = true
     private val requestReadContactsPermissions = 100
     private val requestServiceReadAndWriteContactsPermissions = 101
+    private val account = Account("ABC", "vnd.com.app.call")
     private var broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(" onReceive ", " onReceive ")
@@ -43,13 +49,9 @@ class ContactActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contact)
-        val navigation = binding.navigation
-        viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
-        binding.viewPager.adapter = viewPagerAdapter
-        navigation.setOnItemSelectedListener(onNavigationItemSelectedListener)
-        navigation.selectedItemId = R.id.contacts
-        binding.viewPager.currentItem = 0
-        binding.viewPager.offscreenPageLimit = 0
+        navigation = binding.navigation
+        setViewPagerAdapter()
+        createAccount()
         initService()
     }
     private val onNavigationItemSelectedListener = object :  NavigationBarView.OnItemSelectedListener{
@@ -131,5 +133,51 @@ class ContactActivity : AppCompatActivity(){
             startService(serviceIntent)
             registerReceiver()
         }
+    }
+    private fun createAccount(){
+        val accountManager = AccountManager.get(this)
+        val success = accountManager.addAccountExplicitly(account, null, null)
+        val extras = intent.extras
+        if (extras != null) {
+            if (success) {
+                val response: AccountAuthenticatorResponse? = extras.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
+                val result = Bundle()
+                result.putString(AccountManager.KEY_ACCOUNT_NAME, "ABC")
+                result.putString(AccountManager.KEY_ACCOUNT_TYPE, "vnd.com.app.call")
+                response?.onResult(result)
+            }
+            finish()
+        }
+    }
+
+    private fun setViewPagerAdapter(){
+        viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
+        viewPagerAdapter.notifyDataSetChanged()
+//        binding.viewPager.addOnPageChangeListener(object : OnPageChangeListener {
+//            override fun onPageScrolled(
+//                position: Int,
+//                positionOffset: Float,
+//                positionOffsetPixels: Int
+//            ) {
+//
+//            }
+//
+//            override fun onPageSelected(position: Int) {
+//                TODO("Not yet implemented")
+//            }
+//
+//            override fun onPageScrollStateChanged(state: Int) {
+//                TODO("Not yet implemented")
+//            }
+//        })
+        binding.viewPager.adapter = viewPagerAdapter
+        binding.viewPager.adapter?.notifyDataSetChanged()
+        navigation.setOnItemSelectedListener(onNavigationItemSelectedListener)
+    }
+
+    fun turnOffLoading(position: Int){
+
+        viewPagerAdapter.turnOffLoading(position)
+
     }
 }

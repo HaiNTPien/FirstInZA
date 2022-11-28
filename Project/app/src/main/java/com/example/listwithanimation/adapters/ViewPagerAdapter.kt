@@ -1,26 +1,54 @@
 package com.example.listwithanimation.adapters
 
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import androidx.fragment.app.FragmentStatePagerAdapter
-import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.example.listwithanimation.view.ContactFragment
+import com.example.listwithanimation.view.LoadingFragment
 import com.example.listwithanimation.view.LoggingFragment
+import java.util.*
 
-class ViewPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+class ViewPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
 
     private val contactFragment = ContactFragment()
-    val loggingFragment = LoggingFragment()
+    private val loggingFragment = LoggingFragment()
+    private var isLoadingContactFragment = false
+    private var isLoadingLoggingFragment = true
     override fun getItem(position: Int): Fragment {
-        return when (position) {
-            0 -> contactFragment
-            else -> loggingFragment
+        return when(position) {
+            0 -> {
+                if (isLoadingContactFragment) {
+                    LoadingFragment()
+                }else {
+                    contactFragment
+                }
+            }
+            else -> {
+                if (isLoadingLoggingFragment) {
+                    LoadingFragment()
+                }else {
+                    loggingFragment
+                }
+            }
         }
     }
 
     override fun getCount(): Int {
         return 2
     }
+
+    override fun getItemPosition(`object`: Any): Int {
+        return POSITION_NONE
+    }
+
+    fun turnOffLoading(pagePosition: Int){
+        if(pagePosition == 0) { isLoadingContactFragment = false }
+        if(pagePosition == 1) { isLoadingLoggingFragment = false }
+//        listFragment.remove(loadingFragment)
+        this.notifyDataSetChanged()
+    }
+
 
 }

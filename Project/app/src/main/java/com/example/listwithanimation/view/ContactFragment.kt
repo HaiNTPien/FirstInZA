@@ -2,6 +2,8 @@ package com.example.listwithanimation.view
 
 import android.Manifest
 import android.accounts.Account
+import android.accounts.AccountAuthenticatorResponse
+import android.accounts.AccountManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -32,11 +34,9 @@ class ContactFragment : Fragment(), Contact.View {
 
     var presenters: ContactPresenters? = null
 
-    private val requestReadContactsPermissions = 100
     private val adapter : ContactAdapter by lazy {
         ContactAdapter()
     }
-    private val account = Account("ABC", "vnd.com.app.call")
     private lateinit var binding: FragmentContactBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,29 +49,8 @@ class ContactFragment : Fragment(), Contact.View {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         presenters = ContactPresenters(this, ListContactModel())
-//        createAccount()
         initListContact()
     }
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
-
-//    fun createAccount(){
-//        val accountManager = AccountManager.get(this)
-//        val success = accountManager.addAccountExplicitly(account, null, null)
-//        val extras = intent.extras
-//        if (extras != null) {
-//            if (success) {
-//                val response: AccountAuthenticatorResponse? = extras.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
-//                val result = Bundle()
-//                result.putString(AccountManager.KEY_ACCOUNT_NAME, "ABC")
-//                result.putString(AccountManager.KEY_ACCOUNT_TYPE, "vnd.com.app.call")
-//                response?.onResult(result)
-//            }
-//            finish()
-//        }
-//    }
 
 //    @SuppressLint("Range")
 //    fun handleBackFromSystemContact(){
@@ -121,6 +100,8 @@ class ContactFragment : Fragment(), Contact.View {
             layoutManager = linearLayoutManager
             this@ContactFragment.adapter.onItemClickCallback = {
                 ContactManager.deleteAllSystemContact(context)
+//                ContactManager.addNumberPhoneToContact(context.contentResolver, it.number[0].id, "0379256882")
+//                ContactManager.syncContact(context, ContactManager.queryContact(context.contentResolver).first.distinctBy { it.id })
             }
             this@ContactFragment.adapter.configRecyclerView(this)
         }

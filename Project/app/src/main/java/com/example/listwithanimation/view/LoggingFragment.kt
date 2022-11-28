@@ -48,9 +48,8 @@ class LoggingFragment : Fragment() {
 
     }
 
-    fun initRecyclerView() {
-        val linearLayoutManager =
-            LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false)
+    private fun initRecyclerView() {
+        val linearLayoutManager = LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false)
         adapter = LoggingAdapter()
         binding.rvLogging.apply {
             layoutManager = linearLayoutManager
@@ -93,9 +92,7 @@ class LoggingFragment : Fragment() {
         if (isResumed && !isRecyclerViewInit) {
             initRecyclerView()
             isRecyclerViewInit = true
-            requireActivity().runOnUiThread {
-                binding.progressBar.visibility = View.GONE
-            }
+            binding.progressBar.visibility = View.GONE
         }
     }
 }
