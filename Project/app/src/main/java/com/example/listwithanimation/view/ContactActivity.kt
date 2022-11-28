@@ -12,7 +12,6 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.viewpager.widget.ViewPager.OnPageChangeListener
 import com.example.listwithanimation.R
 import com.example.listwithanimation.SyncService
 import com.example.listwithanimation.adapters.ViewPagerAdapter
@@ -50,9 +49,7 @@ class ContactActivity : AppCompatActivity(){
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contact)
         navigation = binding.navigation
-        setViewPagerAdapter()
-        createAccount()
-        initService()
+        askForPermissions()
     }
     private val onNavigationItemSelectedListener = object :  NavigationBarView.OnItemSelectedListener{
         override fun onNavigationItemSelected(item: MenuItem): Boolean {
@@ -104,6 +101,8 @@ class ContactActivity : AppCompatActivity(){
             }
             requestServiceReadAndWriteContactsPermissions -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    setViewPagerAdapter()
+                    createAccount()
                     val serviceIntent = Intent(this, SyncService::class.java)
                     startService(serviceIntent)
                     registerReceiver()
@@ -117,7 +116,7 @@ class ContactActivity : AppCompatActivity(){
         super.onDestroy()
         unregisterReceiver(broadcastReceiver)
     }
-    private fun initService() {
+    private fun askForPermissions() {
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.WRITE_CONTACTS
@@ -129,6 +128,8 @@ class ContactActivity : AppCompatActivity(){
                 requestServiceReadAndWriteContactsPermissions
             )
         } else {
+            setViewPagerAdapter()
+            createAccount()
             val serviceIntent = Intent(this, SyncService::class.java)
             startService(serviceIntent)
             registerReceiver()
@@ -153,30 +154,12 @@ class ContactActivity : AppCompatActivity(){
     private fun setViewPagerAdapter(){
         viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
         viewPagerAdapter.notifyDataSetChanged()
-//        binding.viewPager.addOnPageChangeListener(object : OnPageChangeListener {
-//            override fun onPageScrolled(
-//                position: Int,
-//                positionOffset: Float,
-//                positionOffsetPixels: Int
-//            ) {
-//
-//            }
-//
-//            override fun onPageSelected(position: Int) {
-//                TODO("Not yet implemented")
-//            }
-//
-//            override fun onPageScrollStateChanged(state: Int) {
-//                TODO("Not yet implemented")
-//            }
-//        })
         binding.viewPager.adapter = viewPagerAdapter
         binding.viewPager.adapter?.notifyDataSetChanged()
         navigation.setOnItemSelectedListener(onNavigationItemSelectedListener)
     }
 
     fun turnOffLoading(position: Int){
-
         viewPagerAdapter.turnOffLoading(position)
 
     }
