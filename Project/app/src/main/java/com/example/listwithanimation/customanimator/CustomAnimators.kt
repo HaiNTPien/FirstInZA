@@ -2,6 +2,10 @@ package com.example.listwithanimation
 
 import androidx.recyclerview.widget.RecyclerView
 import com.example.listwithanimation.customanimator.BaseItemAnimator
+import com.example.listwithanimation.utils.ADD_DURATION
+import com.example.listwithanimation.utils.CHANGE_DURATION
+import com.example.listwithanimation.utils.MOVE_DURATION
+import com.example.listwithanimation.utils.REMOVE_DURATION
 
 
 open class SlideInDownAnimator : BaseItemAnimator() {

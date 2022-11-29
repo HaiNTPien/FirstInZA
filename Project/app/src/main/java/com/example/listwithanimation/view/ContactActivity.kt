@@ -12,6 +12,8 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import com.example.listwithanimation.utils.APP_ACCOUNT_NAME
+import com.example.listwithanimation.utils.APP_ACCOUNT_TYPE
 import com.example.listwithanimation.R
 import com.example.listwithanimation.SyncService
 import com.example.listwithanimation.adapters.ViewPagerAdapter
@@ -28,7 +30,7 @@ class ContactActivity : AppCompatActivity(){
     private var activityInForeground = true
     private val requestReadContactsPermissions = 100
     private val requestServiceReadAndWriteContactsPermissions = 101
-    private val account = Account("ABC", "vnd.com.app.call")
+    private val account = Account(APP_ACCOUNT_NAME, APP_ACCOUNT_TYPE)
     private var broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             Log.d(" onReceive ", " onReceive ")
@@ -40,6 +42,8 @@ class ContactActivity : AppCompatActivity(){
                         }
                     }else {
                         needUpdate = true
+
+//                        (viewPagerAdapter.getItem(0) as ContactFragment).updateContactList(this@ContactActivity, packageManager)
                     }
                 }
             }
@@ -143,8 +147,8 @@ class ContactActivity : AppCompatActivity(){
             if (success) {
                 val response: AccountAuthenticatorResponse? = extras.getParcelable(AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE)
                 val result = Bundle()
-                result.putString(AccountManager.KEY_ACCOUNT_NAME, "ABC")
-                result.putString(AccountManager.KEY_ACCOUNT_TYPE, "vnd.com.app.call")
+                result.putString(AccountManager.KEY_ACCOUNT_NAME, APP_ACCOUNT_NAME)
+                result.putString(AccountManager.KEY_ACCOUNT_TYPE, APP_ACCOUNT_TYPE)
                 response?.onResult(result)
             }
             finish()

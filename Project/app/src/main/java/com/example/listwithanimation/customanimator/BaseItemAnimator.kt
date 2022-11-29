@@ -6,10 +6,10 @@ import android.os.Handler
 import android.os.Looper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SimpleItemAnimator
-import com.example.listwithanimation.CHANGE_DURATION
-import com.example.listwithanimation.MOVE_DURATION
-import com.example.listwithanimation.REMOVE_DURATION
-import com.example.listwithanimation.ViewHelper.clear
+import com.example.listwithanimation.utils.CHANGE_DURATION
+import com.example.listwithanimation.utils.MOVE_DURATION
+import com.example.listwithanimation.utils.REMOVE_DURATION
+import com.example.listwithanimation.utils.ViewHelper.clear
 
 abstract class BaseItemAnimator : SimpleItemAnimator() {
 

@@ -2,11 +2,16 @@ package com.example.listwithanimation.helpers
 
 import android.annotation.SuppressLint
 import android.content.*
+import android.database.Cursor
 import android.net.Uri
 import android.os.RemoteException
 import android.provider.ContactsContract
 import android.provider.ContactsContract.RawContacts
 import android.util.Log
+import com.example.listwithanimation.utils.APP_ACCOUNT_NAME
+import com.example.listwithanimation.utils.APP_ACCOUNT_TYPE
+import com.example.listwithanimation.utils.APP_MIMETYPE
+import com.example.listwithanimation.helpers.SharePreferences.get
 import com.example.listwithanimation.helpers.SharePreferences.set
 import com.example.listwithanimation.models.ActionContact
 import com.example.listwithanimation.models.ContactModel
@@ -19,21 +24,28 @@ class ContactManager {
     companion object {
         @SuppressLint("Range", "Recycle")
         fun queryContact(contentResolver: ContentResolver): Pair<MutableList<ContactModel>, Boolean> {
-            val lst = mutableListOf<ContactModel>()
-            val lstAllQueryResult = mutableListOf<ContactModel>()
+            val contactLst = mutableListOf<ContactModel>()
+            val queryResultLst = mutableListOf<ContactModel>()
             val removeRawDataLst = mutableListOf<Triple<String, String, String>>()
+            var needSyncOperation = false
             val removeContactLst = mutableListOf<String>()
-            val cur = contentResolver.query(
-                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
-                null,
-                null,
-                null,
-                null
-            )
-            if (cur!!.count > 0) {
+            var cur: Cursor? = null
+            try {
+                cur = contentResolver.query(
+                    ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                    null,
+                    null,
+                    null,
+                    null
+                )
+            }catch (_: Exception) {
+
+            }
+
+            if (cur != null && cur.count > 0) {
                 while (cur.moveToNext()) {
                     val id =
-                        cur.getString(cur.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID)) + ""
+                        cur.getString(cur.getColumnIndex(RawContacts.CONTACT_ID)) + ""
                     val name =
                         cur.getString(cur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)) + ""
                     val number =
@@ -48,227 +60,77 @@ class ContactManager {
                         cur.getString(cur.getColumnIndex(ContactsContract.CommonDataKinds.Phone.RAW_CONTACT_ID)) + ""
                     val phoneId =
                         cur.getString(cur.getColumnIndex(ContactsContract.CommonDataKinds.Phone._ID)) + ""
-                    Log.d(" QueryContact ", " $id $name $number $type $accountName $accountType")
-                    val positionInList = itemExistInListContact(id, lstAllQueryResult)
+                    val positionInList = itemExistInListContact(id, queryResultLst)
                     if (positionInList != -1) {
-                        if (accountType == "vnd.com.app.call") {
-                            lstAllQueryResult[positionInList].number.add(
-                                PhoneInContactModel(
-                                    phoneId,
-                                    number,
-                                    type,
-                                    accountName,
-                                    accountType
-                                )
-                            )
-
-                        } else {
-                            lstAllQueryResult[positionInList].number.add(
-                                0,
-                                PhoneInContactModel(
-                                    phoneId,
-                                    number,
-                                    type,
-                                    accountName,
-                                    accountType
-                                )
-                            )
-
+                        if (accountType == APP_ACCOUNT_TYPE) {
+                            queryResultLst[positionInList].number.add(PhoneInContactModel(phoneId, number, type, accountName, accountType))
+                        }else {
+                            queryResultLst[positionInList].number.add(0, PhoneInContactModel(phoneId, number, type, accountName, accountType))
                         }
                     } else {
+                        var phoneTypeTemp = ""
                         when (accountType) {
                             "vnd.sec.contact.phone" -> {
-                                lstAllQueryResult.add(
-                                    0,
-                                    ContactModel(
-                                        id,
-                                        rawContactId,
-                                        name,
-                                        mutableListOf(
-                                            PhoneInContactModel(
-                                                phoneId,
-                                                number,
-                                                type,
-                                                accountName,
-                                                accountType
-                                            )
-                                        ),
-                                        "From Phone"
-                                    )
-                                )
+                                phoneTypeTemp = "From Phone"
+
                             }
                             "vnd.sec.contact.sim" -> {
-                                lstAllQueryResult.add(
-                                    0,
-                                    ContactModel(
-                                        id,
-                                        rawContactId,
-                                        name,
-                                        mutableListOf(
-                                            PhoneInContactModel(
-                                                phoneId,
-                                                number,
-                                                type,
-                                                accountName,
-                                                accountType
-                                            )
-                                        ),
-                                        "From Sim 1"
-                                    )
-                                )
+                                phoneTypeTemp = "From Sim 1"
+
                             }
                             "vnd.sec.contact.sim2" -> {
-                                lstAllQueryResult.add(
-                                    0,
-                                    ContactModel(
-                                        id,
-                                        rawContactId,
-                                        name,
-                                        mutableListOf(
-                                            PhoneInContactModel(
-                                                phoneId,
-                                                number,
-                                                type,
-                                                accountName,
-                                                accountType
-                                            )
-                                        ),
-                                        "From Sim 2"
-                                    )
-                                )
+                                phoneTypeTemp = "From Sim 2"
+
                             }
                             "com.google" -> {
-                                lstAllQueryResult.add(
-                                    0,
-                                    ContactModel(
-                                        id,
-                                        rawContactId,
-                                        name,
-                                        mutableListOf(
-                                            PhoneInContactModel(
-                                                phoneId,
-                                                number,
-                                                type,
-                                                accountName,
-                                                accountType
-                                            )
-                                        ),
-                                        "From Google Account : $accountName"
-                                    )
-                                )
+                                phoneTypeTemp = "From Google Account : $accountName"
+
                             }
                             "com.samsung.android.exchange" -> {
-                                lstAllQueryResult.add(
-                                    0,
-                                    ContactModel(
-                                        id,
-                                        rawContactId,
-                                        name,
-                                        mutableListOf(
-                                            PhoneInContactModel(
-                                                phoneId,
-                                                number,
-                                                type,
-                                                accountName,
-                                                accountType
-                                            )
-                                        ),
-                                        "From Microsoft Account : $accountName"
-                                    )
-                                )
+                                phoneTypeTemp = "From Microsoft Account : $accountName"
+
                             }
                             "com.osp.app.signin" -> {
-                                lstAllQueryResult.add(
-                                    0,
-                                    ContactModel(
-                                        id,
-                                        rawContactId,
-                                        name,
-                                        mutableListOf(
-                                            PhoneInContactModel(
-                                                phoneId,
-                                                number,
-                                                type,
-                                                accountName,
-                                                accountType
-                                            )
-                                        ),
-                                        "From Samsung Account : $accountName"
-                                    )
-                                )
+                                phoneTypeTemp = "From Samsung Account : $accountName"
                             }
-                            "vnd.com.app.call" -> {
-                                lstAllQueryResult.add(
-                                    ContactModel(
-                                        id,
-                                        rawContactId,
-                                        name,
-                                        mutableListOf(
-                                            PhoneInContactModel(
-                                                phoneId,
-                                                number,
-                                                type,
-                                                accountName,
-                                                accountType
-                                            )
-                                        ),
-                                        "Custom type"
-                                    )
-                                )
+                            APP_ACCOUNT_TYPE -> {
+                                phoneTypeTemp = "Custom type"
+
                             }
                         }
+                        queryResultLst.add(ContactModel(id, rawContactId, name, mutableListOf(PhoneInContactModel(phoneId, number, type, accountName, accountType)), phoneTypeTemp))
                     }
                 }
             }
-//            var lstSize = lstAllQueryResult.size
-//            var index = 0
-//            while (index < lstSize) {
-//                if(lstAllQueryResult[index].accountType == "vnd.com.app.call") {
-//                    lstSize--
-//                    val item = lstAllQueryResult.removeAt(index)
-//                    lstAllQueryResult.add(item)
-//                }
-//                index++
-//            }
 
-            for (i in 0 until lstAllQueryResult.size) {
-//                Log.d(" query " ," ${i.id} ${i.isSynced} ${i.displayName} ${i.accountName} ${i.accountType}")
-//                val existItemPosition = itemExistInList(i.id, i.displayName, i.number, lst)
-                val pendingRemoveLst = mutableListOf<PhoneInContactModel>()
-                for (j in lstAllQueryResult[i].number) {
-                    val existItemPosition =
-                        getPositionByNumber(j.number, lstAllQueryResult[i].number.toList())
-                    if (existItemPosition != -1 && lstAllQueryResult[i].number[existItemPosition].id != j.id) {
-                        if (j.accountName == "abc" && j.accountType == "vnd.com.app.call") {
-                            lstAllQueryResult[i].number[existItemPosition].isSynced = true
-                            pendingRemoveLst.add(j)
+            for (contact in queryResultLst) {
+                val removeCustomTypeRowLst = mutableListOf<PhoneInContactModel>()
+                for (phoneNumber in contact.number) {
+                    val existItemPosition = getPositionByNumber(phoneNumber.number, contact.number.toList())
+                    if (existItemPosition != -1 && contact.number[existItemPosition].id != phoneNumber.id) {
+                        if (phoneNumber.accountName == APP_ACCOUNT_NAME && phoneNumber.accountType == APP_ACCOUNT_TYPE) {
+                            contact.number[existItemPosition].isSynced = true
+                            removeCustomTypeRowLst.add(phoneNumber)
                         }
                     } else {
-                        if (j.accountName == "abc" && j.accountType == "vnd.com.app.call") {
-                            pendingRemoveLst.add(j)
-                            removeRawDataLst.add(
-                                Triple(
-                                    j.number,
-                                    j.id,
-                                    lstAllQueryResult[i].displayName
-                                )
-                            )
-
+                        if (phoneNumber.accountName == APP_ACCOUNT_NAME && phoneNumber.accountType == APP_ACCOUNT_TYPE) {
+                            removeCustomTypeRowLst.add(phoneNumber)
+                            removeRawDataLst.add(Triple(phoneNumber.number, phoneNumber.id, contact.displayName))
                         }
                     }
                 }
-                for (k in pendingRemoveLst) {
-                    lstAllQueryResult[i].number.remove(k)
+                for (removeItem in removeCustomTypeRowLst) {
+                    contact.number.remove(removeItem)
                 }
-                if (lstAllQueryResult[i].number.isEmpty()) {
-                    removeContactLst.add(lstAllQueryResult[i].id)
+                if (contact.number.isEmpty()) {
+                    removeContactLst.add(contact.id)
                 }
-                lst.add(lstAllQueryResult[i])
+                contactLst.add(contact)
             }
 
             if (removeRawDataLst.isNotEmpty()) {
-                for (i in removeRawDataLst) {
-                    deleteRawDataInContact(contentResolver, i.first, i.second, i.third)
+                for (removeItem in removeRawDataLst) {
+                    deleteRawDataInContact(contentResolver, removeItem.first, removeItem.second)
                 }
             }
             if (removeContactLst.isNotEmpty()) {
@@ -276,39 +138,58 @@ class ContactManager {
                     deleteAContact(contentResolver, i)
                 }
             }
-            var needSyncOperation = false
-            for (i in lst) {
-                for (j in i.number) {
-                    if (!j.isSynced) {
+            for (contact in contactLst) {
+                for (phoneNumber in contact.number) {
+                    if (!phoneNumber.isSynced) {
                         needSyncOperation = true
                     }
                 }
             }
-            Log.d(" return List ", Gson().toJson(lst))
-//            logChangeInContact(lst, context)
-            return Pair(lst, needSyncOperation)
+
+            return Pair(contactLst, needSyncOperation)
+        }
+
+        private fun isNeedSyncContact(contactLst: MutableList<ContactModel>): Boolean {
+            var needSyncOperation = false
+            val hashSet = HashSet<PhoneInContactModel>()
+            for (contact in contactLst) {
+                hashSet.addAll(contact.number)
+            }
+            for(numberPhone in hashSet.toList()){
+                if(!numberPhone.isSynced){
+                    needSyncOperation = true
+                    break
+                }
+            }
+            return needSyncOperation
         }
 
         fun logChangeInContact(newList: MutableList<ContactModel>, context: Context) {
-//            Log.d(" logChangeInContact ", " logChangeInContact ")
             val sharePref = SharePreferences.defaultPrefs(context)
-            val oldLst: MutableList<ContactModel>
-            if (sharePref.getString("contacts", null) != null) {
-//                Log.d(" JSON ", sharePref.getString("contacts", "")!!)
-                oldLst = Gson().fromJson(sharePref.getString("contacts", ""), Array<ContactModel>::class.java).toMutableList()
-                if (sharePref.getString("dataLog", null) == null) {
-                    sharePref["dataLog"] = Gson().toJson(listOf<LogModel>())
-                }
-                val oldLog =
-                    Gson().fromJson(sharePref.getString("dataLog", ""), Array<LogModel>::class.java)
-                        .toMutableList()
-                for (i in oldLst.size - 1 downTo 0) {
-//                    Log.d("Oldlist ", "$i ${oldLst[i].displayName} ${oldLst[i].number.toString()} ")
-                    val itemPositionInNewList = getPositionInListContactByRawContactId(oldLst[i].rawContactId, newList)
-                    if (itemPositionInNewList == -1) {
-                        //add Remove Contact Log
-//                        Log.d("Oldlist remove", "${oldLst[i].id} ${oldLst[i].displayName} ${oldLst[i].number} " )
-                        for (j in oldLst[i].number) {
+            val oldLst: MutableList<ContactModel> = Gson().fromJson(sharePref["contacts", ""], Array<ContactModel>::class.java).toMutableList()
+            val oldLog = Gson().fromJson(sharePref["dataLog", ""], Array<LogModel>::class.java).toMutableList()
+            for (i in oldLst.size - 1 downTo 0) {
+                val itemPositionInNewList = getPositionInListContactByRawContactId(oldLst[i].rawContactId, newList)
+                if (itemPositionInNewList == -1) {
+                    for (j in oldLst[i].number) {
+                        oldLog.add(
+                            LogModel(
+                                id = null,
+                                ActionContact.DELETE_CONTACT,
+                                oldLst[i].id,
+                                "Remove contact ${oldLst[i].displayName} with number phone: ${j.number}"
+                            )
+                        )
+                    }
+                    oldLst.removeAt(i)
+                } else {
+                    val removePhoneLst = mutableListOf<PhoneInContactModel>()
+                    for (j in oldLst[i].number) {
+                        if (itemExistInListPhone(
+                                j.id,
+                                newList[itemPositionInNewList].number
+                            ) == -1
+                        ) {
                             oldLog.add(
                                 LogModel(
                                     id = null,
@@ -317,82 +198,32 @@ class ContactManager {
                                     "Remove contact ${oldLst[i].displayName} with number phone: ${j.number}"
                                 )
                             )
-                        }
-                        oldLst.removeAt(i)
-                    } else {
-                        val removePhoneLst = mutableListOf<PhoneInContactModel>()
-                        for (j in oldLst[i].number) {
-                            if (itemExistInListPhone(j.id, newList[itemPositionInNewList].number) == -1) {
-                                oldLog.add(
-                                    LogModel(
-                                        id = null,
-                                        ActionContact.DELETE_CONTACT,
-                                        oldLst[i].id,
-                                        "Remove contact ${oldLst[i].displayName} with number phone: ${j.number}"
-                                    )
-                                )
-                                removePhoneLst.add(j)
-                            }
-                        }
-                        for(j in removePhoneLst) {
-                            oldLst[i].number.remove(j)
+                            removePhoneLst.add(j)
                         }
                     }
+                    for (j in removePhoneLst) {
+                        oldLst[i].number.remove(j)
+                    }
                 }
-                for (i in newList) {
-                    val position = getPositionInListContactByRawContactId(i.rawContactId, oldLst)
-                    if (position == -1) {
-                        //add Add Contact Log
-//                        Log.d("newList add", "$i ${i.displayName} ${i.number} " )
-                        for (j in i.number) {
-                            oldLog.add(
-                                LogModel(
-                                    id = null,
-                                    ActionContact.ADD_CONTACT,
-                                    i.id,
-                                    "Add contact ${i.displayName} with number phone: ${j.number}"
-                                )
+            }
+            for (i in newList) {
+                val position = getPositionInListContactByRawContactId(i.rawContactId, oldLst)
+                if (position == -1) {
+                    for (j in i.number) {
+                        oldLog.add(
+                            LogModel(
+                                id = null,
+                                ActionContact.ADD_CONTACT,
+                                i.id,
+                                "Add contact ${i.displayName} with number phone: ${j.number}"
                             )
+                        )
 
-                        }
-                        oldLst.add(i)
-
-                        if (!i.isSyncLogged) {
-                            for (j in i.number) {
-                                if (j.isSynced) {
-                                    oldLog.add(
-                                        LogModel(
-                                            null,
-                                            ActionContact.SYNC_CONTACT,
-                                            i.id,
-                                            "Synced contact ${i.displayName} with number phone: ${j.number}"
-                                        )
-                                    )
-                                }
-                            }
-                            i.isSyncLogged = true
-                        }
-                    } else {
-                        if (oldLst[position].displayName != i.displayName) {
-                            oldLog.add(
-                                LogModel(
-                                    id = null,
-                                    ActionContact.UPDATE_CONTACT,
-                                    i.id,
-                                    "Update contact name from ${oldLst[position].displayName} to ${i.displayName}"
-                                )
-                            )
-                        }
+                    }
+                    oldLst.add(i)
+                    if (!i.isSyncLogged) {
                         for (j in i.number) {
-                            if (itemExistInListPhone(j.id, oldLst[position].number) == -1) {
-                                oldLog.add(
-                                    LogModel(
-                                        id = null,
-                                        ActionContact.ADD_CONTACT,
-                                        i.id,
-                                        "Add contact ${i.displayName} with number phone: ${j.number}"
-                                    )
-                                )
+                            if (j.isSynced) {
                                 oldLog.add(
                                     LogModel(
                                         null,
@@ -401,83 +232,83 @@ class ContactManager {
                                         "Synced contact ${i.displayName} with number phone: ${j.number}"
                                     )
                                 )
-                            } else {
-                                if (oldLst[position].number[itemExistInListPhone(j.id, oldLst[position].number)].number != j.number) {
-                                    oldLog.add(
-                                        LogModel(
-                                            id = null,
-                                            ActionContact.UPDATE_CONTACT,
-                                            j.id,
-                                            "Update contact ${i.displayName} with new number phone: ${j.number}"
-                                        )
-                                    )
-                                }
-
                             }
+                        }
+                        i.isSyncLogged = true
+                    }
+                } else {
+                    if (oldLst[position].displayName != i.displayName) {
+                        oldLog.add(
+                            LogModel(
+                                id = null,
+                                ActionContact.UPDATE_CONTACT,
+                                i.id,
+                                "Update contact name from ${oldLst[position].displayName} to ${i.displayName}"
+                            )
+                        )
+                    }
+                    for (j in i.number) {
+                        if (itemExistInListPhone(j.id, oldLst[position].number) == -1) {
+                            oldLog.add(
+                                LogModel(
+                                    id = null,
+                                    ActionContact.ADD_CONTACT,
+                                    i.id,
+                                    "Add contact ${i.displayName} with number phone: ${j.number}"
+                                )
+                            )
+                            oldLog.add(
+                                LogModel(
+                                    null,
+                                    ActionContact.SYNC_CONTACT,
+                                    i.id,
+                                    "Synced contact ${i.displayName} with number phone: ${j.number}"
+                                )
+                            )
+                        } else {
+                            if (oldLst[position].number[itemExistInListPhone(
+                                    j.id,
+                                    oldLst[position].number
+                                )].number != j.number
+                            ) {
+                                oldLog.add(
+                                    LogModel(
+                                        id = null,
+                                        ActionContact.UPDATE_CONTACT,
+                                        j.id,
+                                        "Update contact ${i.displayName} with new number phone: ${j.number}"
+                                    )
+                                )
+                            }
+
                         }
                     }
                 }
-                sharePref["dataLog"] = Gson().toJson(oldLog.toList())
-                sharePref["contacts"] = Gson().toJson(newList.toList())
-//            } else {
-//                val log = mutableListOf<LogModel>()
-//                sharePref["contacts"] = Gson().toJson(newList.toList())
-//                for (i in newList) {
-//                    for (j in i.number) {
-//                        log.add(
-//                            LogModel(
-//                                id = null,
-//                                ActionContact.ADD_CONTACT,
-//                                i.id,
-//                                "Add contact ${i.displayName} with number phone: ${j.number}"
-//                            )
-//                        )
-//                    }
-//                    log.add(
-//                        LogModel(
-//                            id = null,
-//                            ActionContact.ADD_CONTACT,
-//                            i.id,
-//                            "Add contact ${i.displayName} with number phone: ${i.number}"
-//                        )
-//                    )
-//                    if (!i.isSyncLogged) {
-//                        for (j in i.number) {
-//                            if (j.isSynced) {
-//                                log.add(
-//                                    LogModel(
-//                                        null,
-//                                        ActionContact.SYNC_CONTACT,
-//                                        i.id,
-//                                        "Synced contact ${i.displayName} with number phone: ${i.number}"
-//                                    )
-//                                )
-//                            }
-//                        }
-//                        i.isSyncLogged = true
-//                    }
-//                }
-//                sharePref["dataLog"] = Gson().toJson(log.toList())
             }
-
+            sharePref["dataLog"] = Gson().toJson(oldLog.toList())
+            sharePref["contacts"] = Gson().toJson(newList.toList())
         }
 
         private fun itemExistInListContact(id: String, list: List<ContactModel>): Int {
             return list.withIndex().firstOrNull { id == it.value.id }?.index ?: -1
         }
-        private fun getPositionInListContactByRawContactId(rawContactId: String, list: List<ContactModel>): Int {
-            return list.withIndex().firstOrNull { rawContactId == it.value.rawContactId }?.index ?: -1
+
+        private fun getPositionInListContactByRawContactId(
+            rawContactId: String,
+            list: List<ContactModel>
+        ): Int {
+            return list.withIndex().firstOrNull { rawContactId == it.value.rawContactId }?.index
+                ?: -1
         }
+
         private fun itemExistInListPhone(id: String, list: List<PhoneInContactModel>): Int {
             return list.withIndex().firstOrNull { id == it.value.id }?.index ?: -1
         }
+
         private fun getPositionByNumber(number: String, list: List<PhoneInContactModel>): Int {
             return list.withIndex().firstOrNull { number == it.value.number }?.index ?: -1
         }
 
-        //        private fun itemExistInList(id: String, name: String, number: String, list: List<ContactModel>) : Int {
-//            return list.withIndex().firstOrNull  { it.value.displayName == name && it.value.number == number && id == it.value.id }?.index ?: -1
-//        }
         @SuppressLint("Range", "Recycle")
         fun queryContactLogging(contentResolver: ContentResolver) {
             val cur = contentResolver.query(
@@ -673,22 +504,21 @@ class ContactManager {
                     Log.d(
                         " RawContacts CONTACT_ID", cur3.getString(
                             cur3.getColumnIndex(
-                                ContactsContract.RawContacts.CONTACT_ID
+                                RawContacts.CONTACT_ID
                             )
                         ) + " "
                     )
                     Log.d(
                         " RawContacts _ID",
-                        cur3.getString(cur3.getColumnIndex(ContactsContract.RawContacts._ID)) + " "
+                        cur3.getString(cur3.getColumnIndex(RawContacts._ID)) + " "
                     )
                     Log.d(
                         " RawContacts VERSION", cur3.getString(
                             cur3.getColumnIndex(
-                                ContactsContract.RawContacts.VERSION
+                                RawContacts.VERSION
                             )
                         ) + " "
                     )
-//                Log.d(" RawContacts CONTENT_ITEM_TYPE", cur3.getString(cur3.getColumnIndex(ContactsContract.RawContacts.CONTENT_ITEM_TYPE)) + " ")
                 }
             }
             val cur4 =
@@ -741,39 +571,51 @@ class ContactManager {
                     val ops = ArrayList<ContentProviderOperation>()
                     ops.add(
                         ContentProviderOperation.newInsert(
-                            addCallerIsSyncAdapterParameter(
-                                ContactsContract.RawContacts.CONTENT_URI, true)
-                        )
-                            .withValue(ContactsContract.RawContacts.ACCOUNT_NAME, "abc")
-                            .withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, "vnd.com.app.call")
+                            addCallerIsSyncAdapterParameter(RawContacts.CONTENT_URI))
+                            .withValue(RawContacts.ACCOUNT_NAME, APP_ACCOUNT_NAME)
+                            .withValue(RawContacts.ACCOUNT_TYPE, APP_ACCOUNT_TYPE)
                             .build()
                     )
 
                     ops.add(
                         ContentProviderOperation.newInsert(
-                            addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true)
+                            addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI)
                         )
                             .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                            .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE)
-                            .withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, i.displayName)
+                            .withValue(
+                                ContactsContract.Data.MIMETYPE,
+                                ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE
+                            )
+                            .withValue(
+                                ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME,
+                                i.displayName
+                            )
                             .build()
                     )
                     ops.add(
                         ContentProviderOperation.newInsert(
-                            addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true)
+                            addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI)
                         )
                             .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                            .withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE)
+                            .withValue(
+                                ContactsContract.Data.MIMETYPE,
+                                ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
+                            )
                             .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, j.number)
-                            .withValue(ContactsContract.CommonDataKinds.Phone.TYPE, ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE)
+                            .withValue(
+                                ContactsContract.CommonDataKinds.Phone.TYPE,
+                                ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE
+                            )
                             .build()
                     )
                     ops.add(
                         ContentProviderOperation.newInsert(
-                            addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true)
+                            addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI)
                         )
                             .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                            .withValue(ContactsContract.Data.MIMETYPE, "vnd.android.cursor.item/vnd.com.app.call")
+                            .withValue(
+                                ContactsContract.Data.MIMETYPE, APP_MIMETYPE
+                            )
                             .withValue(ContactsContract.Data.DATA1, j.number)
                             .withValue(ContactsContract.Data.DATA4, " Call " + j.number)
                             .withValue(ContactsContract.Data.SYNC1, j.number)
@@ -794,8 +636,7 @@ class ContactManager {
         private fun deleteRawDataInContact(
             contentResolver: ContentResolver,
             numberPhone: String,
-            deleteId: String,
-            name: String
+            deleteId: String
         ) {
             val ops = ArrayList<ContentProviderOperation>()
 
@@ -808,7 +649,7 @@ class ContactManager {
                 )
                     .withSelection(
                         ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ? OR " + ContactsContract.CommonDataKinds.Phone.NUMBER + " = ?",
-                        arrayOf(deleteId, "vnd.android.cursor.item/vnd.com.app.call", numberPhone)
+                        arrayOf(deleteId, APP_MIMETYPE, numberPhone)
                     ).build()
             )
             ops.add(
@@ -820,7 +661,7 @@ class ContactManager {
                 )
                     .withSelection(
                         ContactsContract.Data.RAW_CONTACT_ID + " = ? AND " + ContactsContract.Data.MIMETYPE + " = ? OR " + ContactsContract.CommonDataKinds.Phone.NUMBER + " = ?",
-                        arrayOf(deleteId, "vnd.android.cursor.item/vnd.com.app.call", numberPhone)
+                        arrayOf(deleteId, APP_MIMETYPE, numberPhone)
                     ).build()
             )
             try {
@@ -866,7 +707,7 @@ class ContactManager {
             val ops = ArrayList<ContentProviderOperation>()
             ops.add(
                 ContentProviderOperation.newUpdate(
-                    addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true)
+                    addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI)
                 )
                     .withSelection(
                         ContactsContract.Data.RAW_CONTACT_ID + " =? ",
@@ -881,7 +722,7 @@ class ContactManager {
             )
             ops.add(
                 ContentProviderOperation.newUpdate(
-                    addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI, true)
+                    addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI)
                 )
                     .withSelection(
                         ContactsContract.Data.RAW_CONTACT_ID + " =? ",
@@ -914,21 +755,19 @@ class ContactManager {
             ops.add(
                 ContentProviderOperation.newDelete(
                     addCallerIsSyncAdapterParameter(
-                        RawContacts.CONTENT_URI,
-                        true
+                        RawContacts.CONTENT_URI
                     )
                 )
-                    .withSelection(ContactsContract.RawContacts._ID + ">? ", arrayOf("-1")).build()
+                    .withSelection(RawContacts._ID + ">? ", arrayOf("-1")).build()
             )
 
             ops.add(
                 ContentProviderOperation.newDelete(
                     addCallerIsSyncAdapterParameter(
-                        RawContacts.CONTENT_URI,
-                        true
+                        RawContacts.CONTENT_URI
                     )
                 )
-                    .withSelection(ContactsContract.RawContacts._ID + ">? ", arrayOf("-1")).build()
+                    .withSelection(RawContacts._ID + ">? ", arrayOf("-1")).build()
             )
 
             try {
@@ -940,15 +779,17 @@ class ContactManager {
             }
         }
 
-        fun addNumberPhoneToContact(contentResolver: ContentResolver, rawContactId: String, number:String) {
-            Log.d(" addNumberPhoneToContact ", " $rawContactId $number")
+        fun addNumberPhoneToContact(
+            contentResolver: ContentResolver,
+            rawContactId: String,
+            number: String
+        ) {
             val ops = ArrayList<ContentProviderOperation>()
 
             ops.add(
                 ContentProviderOperation.newInsert(
                     addCallerIsSyncAdapterParameter(
-                        ContactsContract.Data.CONTENT_URI,
-                        true
+                        ContactsContract.Data.CONTENT_URI
                     )
                 )
                     .withValue(ContactsContract.Data.RAW_CONTACT_ID, rawContactId)
@@ -964,12 +805,12 @@ class ContactManager {
                     .build()
             )
 
-        try {
-            contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+            try {
+                contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
 
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

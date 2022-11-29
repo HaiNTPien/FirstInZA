@@ -12,9 +12,6 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import com.example.listwithanimation.adapters.ContactSyncAdapter
 import com.example.listwithanimation.helpers.ContactManager
-import com.example.listwithanimation.helpers.SharePreferences
-import com.example.listwithanimation.helpers.SharePreferences.set
-import com.google.gson.Gson
 
 
 class SyncService : Service() {
@@ -27,12 +24,12 @@ class SyncService : Service() {
         if (lst.second) {
             Log.d(" Handler ", " Sync contact")
             ContactManager.syncContact(context = this@SyncService, lst.first.distinctBy { it.id })
-        }else {
-        Log.d(" Handler ", " Logging ")
-        ContactManager.logChangeInContact(
-            context = this@SyncService,
-            newList = lst.first.distinctBy { it.id }.toMutableList()
-        )
+        } else {
+            Log.d(" Handler ", " Logging ")
+            ContactManager.logChangeInContact(
+                context = this@SyncService,
+                newList = lst.first.distinctBy { it.id }.toMutableList()
+            )
         }
         passMessageToActivity("needUpdate")
     }

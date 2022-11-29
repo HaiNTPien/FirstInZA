@@ -1,11 +1,6 @@
-package com.example.listwithanimation
+package com.example.listwithanimation.utils
 
-import android.app.Activity
-import android.content.Context
-import android.content.Context.INPUT_METHOD_SERVICE
 import android.view.View
-import android.view.inputmethod.InputMethodManager
-import androidx.fragment.app.Fragment
 
 object ViewHelper {
     @JvmStatic

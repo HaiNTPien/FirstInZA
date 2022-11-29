@@ -72,45 +72,22 @@ class ListContactModel : Contact.Model {
 
     @SuppressLint("Range", "Recycle")
     override fun retrievePhoneContact(context: Context, packageManager: PackageManager) {
-//        Log.d(" Phase ", " 1 ")
         val cr = context.contentResolver
-//        ContactManager.queryContactLogging(cr)
         val sharePref = SharePreferences.defaultPrefs(context)
-        val lst: List<ContactModel> =
-            ContactManager.queryContact(cr).first.distinctBy { it.id }
-//        }else {
-//            lst = Gson().fromJson(sharePref.getString("contacts", null), Array<ContactModel>::class.java).toList()
-//            Log.d("contact data ", "load from share pref")
-//        }
-        updateList(lst)
-//        ContactManager.syncContact(context, getListContactDistinct(false))
+        val lst: List<ContactModel> = ContactManager.queryContact(cr).first.distinctBy { it.id }
+//        updateList(lst)
+        list = lst.toMutableList()
         if (sharePref.getString("contacts", null) == null) {
             sharePref["contacts"] = Gson().toJson(lst)
         }
         if (sharePref.getString("dataLog", null) == null) {
             sharePref["dataLog"] = Gson().toJson(listOf<LogModel>())
         }
-//        ContactManager.logChangeInContact(lst.toMutableList(), context)
-//        Log.d("Phase ", " 2 ")
-        ContactManager.queryContactLogging(cr)
 
-    }
-
-    private fun updateList(newList: List<ContactModel>) {
-        for (i in list.size - 1 downTo 0) {
-            if (!itemExistInList(list[i], newList)) {
-                list.removeAt(i)
-            }
-        }
-        for (i in newList) {
-            if (!itemExistInList(i, list)) {
-                list.add(i)
-            }
-        }
     }
 
     private fun itemExistInList(item: ContactModel, list: List<ContactModel>): Boolean {
-        return list.any { it.displayName == item.displayName && it.number == item.number }
+        return list.any { it.id == item.id }
     }
 
     override fun getListContact(withSectionLabel: Boolean): List<ContactModel> {
