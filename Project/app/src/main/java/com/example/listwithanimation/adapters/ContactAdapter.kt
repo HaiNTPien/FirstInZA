@@ -17,11 +17,11 @@ class ContactAdapter : BaseAdapter<ContactModel>() {
     var onItemClickCallback: ((ContactModel) -> Unit)? = null
 
     override fun areItemTheSame(oldItem: ContactModel, newItem: ContactModel): Boolean {
-        Log.d(" areItemTheSame old ", (oldItem.displayName).toString())
-        Log.d(" areItemTheSame new ", (newItem.displayName).toString())
-        Log.d(" areItemTheSame old ", (oldItem.number).toString())
-        Log.d(" areItemTheSame new ", (newItem.number).toString())
-        return oldItem.displayName == newItem.displayName && oldItem.number == newItem.number && oldItem.id == newItem.id
+        return if(oldItem.id == "" && newItem.id == "") {
+            true
+        }else {
+            oldItem.displayName == newItem.displayName && oldItem.id == newItem.id && oldItem.number == newItem.number
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {

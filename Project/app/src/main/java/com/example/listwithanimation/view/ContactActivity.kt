@@ -12,6 +12,7 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.viewpager.widget.ViewPager
 import com.example.listwithanimation.utils.APP_ACCOUNT_NAME
 import com.example.listwithanimation.utils.APP_ACCOUNT_TYPE
 import com.example.listwithanimation.R
@@ -33,7 +34,6 @@ class ContactActivity : AppCompatActivity(){
     private val account = Account(APP_ACCOUNT_NAME, APP_ACCOUNT_TYPE)
     private var broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            Log.d(" onReceive ", " onReceive ")
             if (intent != null) {
                 if (intent.hasExtra("message")) {
                     if(activityInForeground) {
@@ -42,8 +42,6 @@ class ContactActivity : AppCompatActivity(){
                         }
                     }else {
                         needUpdate = true
-
-//                        (viewPagerAdapter.getItem(0) as ContactFragment).updateContactList(this@ContactActivity, packageManager)
                     }
                 }
             }
@@ -64,7 +62,7 @@ class ContactActivity : AppCompatActivity(){
                 }
                 R.id.log -> {
                     binding.viewPager.currentItem = 1
-                    return false
+                    return true
                 }
             }
             return false
@@ -77,12 +75,9 @@ class ContactActivity : AppCompatActivity(){
     }
     override fun onResume() {
         super.onResume()
-        Log.d("onResume", "enter")
         if(needUpdate) {
-            Log.d("onResume", "need update")
             needUpdate = false
             (viewPagerAdapter.getItem(0) as ContactFragment).updateContactList(this@ContactActivity, packageManager)
-//            (viewPagerAdapter.getItem(1) as LoggingFragment).updateLoggingList()
         }
         activityInForeground = true
     }
@@ -158,13 +153,25 @@ class ContactActivity : AppCompatActivity(){
     private fun setViewPagerAdapter(){
         viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
         viewPagerAdapter.notifyDataSetChanged()
+        binding.viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
+            override fun onPageScrolled(
+                position: Int,
+                positionOffset: Float,
+                positionOffsetPixels: Int
+            ) {
+            }
+
+            override fun onPageSelected(position: Int) {
+                viewPagerAdapter.turnOffLoading(position)
+            }
+
+            override fun onPageScrollStateChanged(state: Int) {
+            }
+
+        })
         binding.viewPager.adapter = viewPagerAdapter
         binding.viewPager.adapter?.notifyDataSetChanged()
         navigation.setOnItemSelectedListener(onNavigationItemSelectedListener)
     }
 
-    fun turnOffLoading(position: Int){
-        viewPagerAdapter.turnOffLoading(position)
-
-    }
 }

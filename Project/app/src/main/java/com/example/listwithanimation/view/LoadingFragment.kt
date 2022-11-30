@@ -17,10 +17,4 @@ class LoadingFragment : Fragment() {
         binding = FragmentLoadingBinding.inflate(inflater, container, false)
         return binding.root
     }
-    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
-        super.setUserVisibleHint(isVisibleToUser)
-        if(isResumed){
-            (requireActivity() as ContactActivity).turnOffLoading(1)
-        }
-    }
 }

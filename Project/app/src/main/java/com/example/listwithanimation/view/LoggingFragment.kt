@@ -26,9 +26,6 @@ class LoggingFragment : Fragment() {
     private lateinit var adapter: LoggingAdapter
     private lateinit var sharePref: SharedPreferences
     private var isRecyclerViewInit = false
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -45,10 +42,12 @@ class LoggingFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        initRecyclerView()
 
     }
 
     private fun initRecyclerView() {
+        isRecyclerViewInit = true
         val linearLayoutManager = LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false)
         adapter = LoggingAdapter()
         binding.rvLogging.apply {
@@ -64,7 +63,6 @@ class LoggingFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        Log.d(" LoggingFragment ", " updateLoggingList ")
         if (isRecyclerViewInit) {
             updateLoggingList()
         }
@@ -74,25 +72,12 @@ class LoggingFragment : Fragment() {
         val loggingList = sharePref["dataLog", ""]
         binding.rvLogging.post {
             if (Gson().fromJson(loggingList, Array<LogModel>::class.java) == null) {
-                adapter.submitList(listOf<LogModel>())
+                adapter.submitList(listOf())
             } else {
-                Log.d(
-                    " LoggingFragment ",
-                    Gson().fromJson(loggingList, Array<LogModel>::class.java).toList().toString()
-                )
                 adapter.submitList(
                     Gson().fromJson(loggingList, Array<LogModel>::class.java).toList()
                 )
             }
-        }
-    }
-
-    override fun setUserVisibleHint(isVisibleToUser: Boolean) {
-        super.setUserVisibleHint(isVisibleToUser)
-        if (isResumed && !isRecyclerViewInit) {
-            initRecyclerView()
-            isRecyclerViewInit = true
-            binding.progressBar.visibility = View.GONE
         }
     }
 }

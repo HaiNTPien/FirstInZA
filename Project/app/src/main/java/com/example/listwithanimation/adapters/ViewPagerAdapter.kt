@@ -44,10 +44,14 @@ class ViewPagerAdapter(fm: FragmentManager) : FragmentStatePagerAdapter(fm) {
     }
 
     fun turnOffLoading(pagePosition: Int){
-        if(pagePosition == 0) { isLoadingContactFragment = false }
-        if(pagePosition == 1) { isLoadingLoggingFragment = false }
-//        listFragment.remove(loadingFragment)
-        this.notifyDataSetChanged()
+        if(pagePosition == 0 && isLoadingContactFragment) {
+            isLoadingContactFragment = false
+            this.notifyDataSetChanged()
+        }
+        if(pagePosition == 1 && isLoadingLoggingFragment ) {
+            isLoadingLoggingFragment = false
+            this.notifyDataSetChanged()
+        }
     }
 
 

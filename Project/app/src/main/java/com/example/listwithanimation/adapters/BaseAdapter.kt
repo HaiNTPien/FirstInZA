@@ -63,8 +63,6 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
     protected fun setList(newList: List<T>) {
         val lPosition = recyclerViewLayoutManager.findLastVisibleItemPosition()
         var isChangedDataInRange = false
-        Log.d(" BaseAdapter " , " oldList ${list.size}")
-        Log.d(" BaseAdapter " , " newList ${newList.size}")
         if (newList.isEmpty()) {
             setListImmediately(listOf())
             return
@@ -100,7 +98,7 @@ abstract class BaseAdapter<T> : RecyclerView.Adapter<ViewHolder>() {
                 }
             }
 
-            val oldList = list
+            val oldList = list.toMutableList()
             val oldHashSet = list.subList(0, if (oldList.isEmpty()) 0 else rightBoundIndexOldList + 1).toHashSet()
             val newHashSet = newList.subList(0, if (newList.isEmpty()) 0 else rightBoundIndexNewList + 1).toHashSet()
             list = newList.toMutableList()

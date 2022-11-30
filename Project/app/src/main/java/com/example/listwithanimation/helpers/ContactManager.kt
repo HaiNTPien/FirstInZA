@@ -568,65 +568,67 @@ class ContactManager {
         fun syncContact(context: Context, list: List<ContactModel>) {
             for (i in list) {
                 for (j in i.number) {
-                    val ops = ArrayList<ContentProviderOperation>()
-                    ops.add(
-                        ContentProviderOperation.newInsert(
-                            addCallerIsSyncAdapterParameter(RawContacts.CONTENT_URI))
-                            .withValue(RawContacts.ACCOUNT_NAME, APP_ACCOUNT_NAME)
-                            .withValue(RawContacts.ACCOUNT_TYPE, APP_ACCOUNT_TYPE)
-                            .build()
-                    )
+                    if(!j.isSynced) {
+                        val ops = ArrayList<ContentProviderOperation>()
+                        ops.add(
+                            ContentProviderOperation.newInsert(
+                                addCallerIsSyncAdapterParameter(RawContacts.CONTENT_URI))
+                                .withValue(RawContacts.ACCOUNT_NAME, APP_ACCOUNT_NAME)
+                                .withValue(RawContacts.ACCOUNT_TYPE, APP_ACCOUNT_TYPE)
+                                .build()
+                        )
 
-                    ops.add(
-                        ContentProviderOperation.newInsert(
-                            addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI)
+                        ops.add(
+                            ContentProviderOperation.newInsert(
+                                addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI)
+                            )
+                                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                .withValue(
+                                    ContactsContract.Data.MIMETYPE,
+                                    ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE
+                                )
+                                .withValue(
+                                    ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME,
+                                    i.displayName
+                                )
+                                .build()
                         )
-                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                            .withValue(
-                                ContactsContract.Data.MIMETYPE,
-                                ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE
+                        ops.add(
+                            ContentProviderOperation.newInsert(
+                                addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI)
                             )
-                            .withValue(
-                                ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME,
-                                i.displayName
-                            )
-                            .build()
-                    )
-                    ops.add(
-                        ContentProviderOperation.newInsert(
-                            addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI)
+                                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                .withValue(
+                                    ContactsContract.Data.MIMETYPE,
+                                    ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
+                                )
+                                .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, j.number)
+                                .withValue(
+                                    ContactsContract.CommonDataKinds.Phone.TYPE,
+                                    ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE
+                                )
+                                .build()
                         )
-                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                            .withValue(
-                                ContactsContract.Data.MIMETYPE,
-                                ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
+                        ops.add(
+                            ContentProviderOperation.newInsert(
+                                addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI)
                             )
-                            .withValue(ContactsContract.CommonDataKinds.Phone.NUMBER, j.number)
-                            .withValue(
-                                ContactsContract.CommonDataKinds.Phone.TYPE,
-                                ContactsContract.CommonDataKinds.Phone.TYPE_MOBILE
-                            )
-                            .build()
-                    )
-                    ops.add(
-                        ContentProviderOperation.newInsert(
-                            addCallerIsSyncAdapterParameter(ContactsContract.Data.CONTENT_URI)
+                                .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
+                                .withValue(
+                                    ContactsContract.Data.MIMETYPE, APP_MIMETYPE
+                                )
+                                .withValue(ContactsContract.Data.DATA1, j.number)
+                                .withValue(ContactsContract.Data.DATA4, " Call " + j.number)
+                                .withValue(ContactsContract.Data.SYNC1, j.number)
+                                .withValue(ContactsContract.Data.SYNC2, i.id)
+                                .build()
                         )
-                            .withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0)
-                            .withValue(
-                                ContactsContract.Data.MIMETYPE, APP_MIMETYPE
-                            )
-                            .withValue(ContactsContract.Data.DATA1, j.number)
-                            .withValue(ContactsContract.Data.DATA4, " Call " + j.number)
-                            .withValue(ContactsContract.Data.SYNC1, j.number)
-                            .withValue(ContactsContract.Data.SYNC2, i.id)
-                            .build()
-                    )
-                    try {
-                        context.contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
+                        try {
+                            context.contentResolver.applyBatch(ContactsContract.AUTHORITY, ops)
 
-                    } catch (e: Exception) {
-                        e.printStackTrace()
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
                     }
                 }
             }

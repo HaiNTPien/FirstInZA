@@ -75,7 +75,6 @@ class ListContactModel : Contact.Model {
         val cr = context.contentResolver
         val sharePref = SharePreferences.defaultPrefs(context)
         val lst: List<ContactModel> = ContactManager.queryContact(cr).first.distinctBy { it.id }
-//        updateList(lst)
         list = lst.toMutableList()
         if (sharePref.getString("contacts", null) == null) {
             sharePref["contacts"] = Gson().toJson(lst)
@@ -84,10 +83,6 @@ class ListContactModel : Contact.Model {
             sharePref["dataLog"] = Gson().toJson(listOf<LogModel>())
         }
 
-    }
-
-    private fun itemExistInList(item: ContactModel, list: List<ContactModel>): Boolean {
-        return list.any { it.id == item.id }
     }
 
     override fun getListContact(withSectionLabel: Boolean): List<ContactModel> {
