@@ -10,26 +10,21 @@ import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.listwithanimation.R
-import com.example.listwithanimation.`interface`.ListItemView
 import com.example.listwithanimation.adapters.MainRecyclerAdapter
 import com.example.listwithanimation.databinding.ActivityMainBinding
 import com.example.listwithanimation.models.ItemModel
-import com.example.listwithanimation.models.ListItemModel
-import com.example.listwithanimation.presenters.ListItemPresenters
 import kotlin.random.Random
 
 
-class MainActivity : AppCompatActivity(), ListItemView.View {
+class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val adapter : MainRecyclerAdapter by lazy {
         MainRecyclerAdapter()
     }
     private var inRemoveMode: Boolean = false
-    var presenter: ListItemPresenters? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
-        presenter = ListItemPresenters(this, ListItemModel())
         initList()
         initFAB()
         initItemBehavior()
@@ -90,7 +85,6 @@ class MainActivity : AppCompatActivity(), ListItemView.View {
                     binding.fabLayout.fabShuffle.startAnimation(showFab)
                     binding.fabLayout.fabShuffle.isClickable = true
                     binding.fabLayout.fabShuffle.setOnClickListener {
-                        presenter?.onShuffleButtonClick()
                     }
 
                 } else {
@@ -107,7 +101,6 @@ class MainActivity : AppCompatActivity(), ListItemView.View {
 
     private fun initList() {
         val linearLayoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        presenter?.onShuffleButtonClick()
         adapter.onItemClickCallback = {
 //            Toast.makeText(this@MainActivity, it.toString() + " " + adapter.itemCount.toString(), Toast.LENGTH_SHORT).show()
             if (inRemoveMode && it != -1) {
@@ -134,7 +127,6 @@ class MainActivity : AppCompatActivity(), ListItemView.View {
                 Thread {
                     while (true) {
                         Thread.sleep(Random.nextLong(100, 5000))
-                        presenter?.onShuffleButtonClick()
                     }
                 }.start()
             }
@@ -147,25 +139,25 @@ class MainActivity : AppCompatActivity(), ListItemView.View {
     }
 
 
-    override fun move(firstPosition: Int, secondPosition: Int) {
+    fun move(firstPosition: Int, secondPosition: Int) {
         binding.rvMain.post {
             adapter.moveItem(firstPosition, secondPosition)
         }
     }
 
-    override fun removeOne(position: Int) {
+    fun removeOne(position: Int) {
         binding.rvMain.post {
             adapter.removeItem(position)
         }
     }
 
-    override fun addOne(item: ItemModel) {
+    fun addOne(item: ItemModel) {
         binding.rvMain.post {
             adapter.addItem(1, item)
         }
     }
 
-    override fun setList(lst: List<ItemModel>) {
+    fun setList(lst: List<ItemModel>) {
         binding.rvMain.post {
             adapter.submitList(lst.toMutableList().shuffled().toList())
         }

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import com.example.listwithanimation.helpers.ContactManager
-import com.example.listwithanimation.`interface`.Contact
 import com.example.listwithanimation.helpers.SharePreferences
 import com.example.listwithanimation.helpers.SharePreferences.set
 import com.google.gson.Gson
@@ -66,12 +65,12 @@ data class LogModel(
     var message: String? = null
 )
 
-class ListContactModel : Contact.Model {
+class ListContactModel{
 
     var list = mutableListOf<ContactModel>()
 
     @SuppressLint("Range", "Recycle")
-    override fun retrievePhoneContact(context: Context, packageManager: PackageManager) {
+    fun retrievePhoneContact(context: Context, packageManager: PackageManager) {
         val cr = context.contentResolver
         val sharePref = SharePreferences.defaultPrefs(context)
         val lst: List<ContactModel> = ContactManager.queryContact(cr).first.distinctBy { it.id }
@@ -85,7 +84,7 @@ class ListContactModel : Contact.Model {
 
     }
 
-    override fun getListContact(withSectionLabel: Boolean): List<ContactModel> {
+    fun getListContact(withSectionLabel: Boolean): List<ContactModel> {
         val returnList = list.sortedBy {
             it.displayName.lowercase(
                 Locale.ROOT
@@ -98,7 +97,7 @@ class ListContactModel : Contact.Model {
         }
     }
 
-    override fun getListContactDistinct(withSectionLabel: Boolean): List<ContactModel> {
+    fun getListContactDistinct(withSectionLabel: Boolean): List<ContactModel> {
         val returnList = list.distinctBy { it.id }.sortedBy {
             it.displayName.lowercase(
                 Locale.ROOT
@@ -111,7 +110,7 @@ class ListContactModel : Contact.Model {
         }
     }
 
-    override fun getContactByID(id: String): ContactModel? {
+    fun getContactByID(id: String): ContactModel? {
         val position = list.withIndex().firstOrNull { id == it.value.id }?.index ?: -1
         return if (position != -1) list[position] else
             null
