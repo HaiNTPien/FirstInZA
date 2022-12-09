@@ -7,6 +7,8 @@ import android.accounts.AccountManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -17,7 +19,9 @@ import com.example.listwithanimation.utils.APP_ACCOUNT_NAME
 import com.example.listwithanimation.utils.APP_ACCOUNT_TYPE
 import com.example.listwithanimation.R
 import com.example.listwithanimation.SyncService
+import com.example.listwithanimation.`interface`.Contact
 import com.example.listwithanimation.adapters.ViewPagerAdapter
+import com.example.listwithanimation.adapters.ViewPagerAdapter2
 import com.example.listwithanimation.databinding.ActivityContactBinding
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
@@ -25,7 +29,7 @@ import com.google.android.material.navigation.NavigationBarView
 
 class ContactActivity : AppCompatActivity(){
     private lateinit var binding: ActivityContactBinding
-    private lateinit var viewPagerAdapter: ViewPagerAdapter
+    private lateinit var viewPagerAdapter: ViewPagerAdapter2
     private var needUpdate = false
     private lateinit var navigation : BottomNavigationView
     private var activityInForeground = true
@@ -151,8 +155,7 @@ class ContactActivity : AppCompatActivity(){
     }
 
     private fun setViewPagerAdapter(){
-        viewPagerAdapter = ViewPagerAdapter(supportFragmentManager)
-        viewPagerAdapter.notifyDataSetChanged()
+        viewPagerAdapter = ViewPagerAdapter2(supportFragmentManager, listOf(ContactFragment(), LoggingFragment()))
         binding.viewPager.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrolled(
                 position: Int,
@@ -162,7 +165,9 @@ class ContactActivity : AppCompatActivity(){
             }
 
             override fun onPageSelected(position: Int) {
-                viewPagerAdapter.turnOffLoading(position)
+                Handler(Looper.getMainLooper()).postDelayed({
+                    viewPagerAdapter.turnOffLoading(position)
+                }, 500)
             }
 
             override fun onPageScrollStateChanged(state: Int) {
@@ -170,7 +175,6 @@ class ContactActivity : AppCompatActivity(){
 
         })
         binding.viewPager.adapter = viewPagerAdapter
-        binding.viewPager.adapter?.notifyDataSetChanged()
         navigation.setOnItemSelectedListener(onNavigationItemSelectedListener)
     }
 
