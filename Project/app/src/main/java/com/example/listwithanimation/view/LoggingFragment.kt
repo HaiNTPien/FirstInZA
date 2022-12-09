@@ -18,6 +18,7 @@ import com.example.listwithanimation.helpers.ContactManager
 import com.example.listwithanimation.helpers.SharePreferences
 import com.example.listwithanimation.helpers.SharePreferences.get
 import com.example.listwithanimation.helpers.SharePreferences.set
+import com.example.listwithanimation.models.ContactModel
 import com.example.listwithanimation.models.LogModel
 import com.google.gson.Gson
 
@@ -43,7 +44,9 @@ class LoggingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initRecyclerView()
-
+        (activity as ContactActivity).viewModel.listLog.observe(viewLifecycleOwner) {
+            adapter.submitList(it)
+        }
     }
 
     private fun initRecyclerView() {
@@ -69,15 +72,6 @@ class LoggingFragment : Fragment() {
     }
 
     private fun updateLoggingList() {
-        val loggingList = sharePref["dataLog", ""]
-        binding.rvLogging.post {
-            if (Gson().fromJson(loggingList, Array<LogModel>::class.java) == null) {
-                adapter.submitList(listOf())
-            } else {
-                adapter.submitList(
-                    Gson().fromJson(loggingList, Array<LogModel>::class.java).toList()
-                )
-            }
-        }
+        (activity as ContactActivity).viewModel.fetchLog(requireActivity())
     }
 }

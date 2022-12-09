@@ -70,19 +70,7 @@ class ListContactModel{
     var list = mutableListOf<ContactModel>()
 
     @SuppressLint("Range", "Recycle")
-    fun retrievePhoneContact(context: Context, packageManager: PackageManager) {
-        val cr = context.contentResolver
-        val sharePref = SharePreferences.defaultPrefs(context)
-        val lst: List<ContactModel> = ContactManager.queryContact(cr).first.distinctBy { it.id }
-        list = lst.toMutableList()
-        if (sharePref.getString("contacts", null) == null) {
-            sharePref["contacts"] = Gson().toJson(lst)
-        }
-        if (sharePref.getString("dataLog", null) == null) {
-            sharePref["dataLog"] = Gson().toJson(listOf<LogModel>())
-        }
 
-    }
 
     fun getListContact(withSectionLabel: Boolean): List<ContactModel> {
         val returnList = list.sortedBy {

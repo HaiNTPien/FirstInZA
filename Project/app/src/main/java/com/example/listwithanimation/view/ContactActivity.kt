@@ -7,11 +7,11 @@ import android.accounts.AccountManager
 import android.content.*
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.example.listwithanimation.utils.APP_ACCOUNT_NAME
 import com.example.listwithanimation.utils.APP_ACCOUNT_TYPE
@@ -19,6 +19,7 @@ import com.example.listwithanimation.R
 import com.example.listwithanimation.SyncService
 import com.example.listwithanimation.adapters.ViewPagerAdapter
 import com.example.listwithanimation.databinding.ActivityContactBinding
+import com.example.listwithanimation.viewmodels.ContactViewModels
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
 
@@ -32,13 +33,14 @@ class ContactActivity : AppCompatActivity(){
     private val requestReadContactsPermissions = 100
     private val requestServiceReadAndWriteContactsPermissions = 101
     private val account = Account(APP_ACCOUNT_NAME, APP_ACCOUNT_TYPE)
+    lateinit var viewModel : ContactViewModels
     private var broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent != null) {
                 if (intent.hasExtra("message")) {
                     if(activityInForeground) {
                         if (context != null) {
-                            (viewPagerAdapter.getItem(0) as ContactFragment).updateContactList(this@ContactActivity, packageManager)
+                            (viewPagerAdapter.getItem(0) as ContactFragment).updateContactList(this@ContactActivity)
                         }
                     }else {
                         needUpdate = true
@@ -50,6 +52,7 @@ class ContactActivity : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_contact)
+        viewModel = ViewModelProvider(this)[ContactViewModels::class.java]
         navigation = binding.navigation
         askForPermissions()
     }
@@ -77,7 +80,7 @@ class ContactActivity : AppCompatActivity(){
         super.onResume()
         if(needUpdate) {
             needUpdate = false
-            (viewPagerAdapter.getItem(0) as ContactFragment).updateContactList(this@ContactActivity, packageManager)
+            (viewPagerAdapter.getItem(0) as ContactFragment).updateContactList(this@ContactActivity)
         }
         activityInForeground = true
     }
@@ -95,7 +98,7 @@ class ContactActivity : AppCompatActivity(){
         when(requestCode) {
             requestReadContactsPermissions -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    (viewPagerAdapter.getItem(0) as ContactFragment).updateContactList(this@ContactActivity, packageManager)
+                    (viewPagerAdapter.getItem(0) as ContactFragment).updateContactList(this@ContactActivity)
                 }
             }
             requestServiceReadAndWriteContactsPermissions -> {

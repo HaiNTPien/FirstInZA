@@ -69,7 +69,7 @@ class SyncService : Service() {
         return mSyncAdapter.syncAdapterBinder
     }
 
-    fun passMessageToActivity(needUpdate: String) {
+    private fun passMessageToActivity(needUpdate: String) {
         val intent = Intent()
         intent.action = "passMessage"
         intent.putExtra("message", needUpdate)
