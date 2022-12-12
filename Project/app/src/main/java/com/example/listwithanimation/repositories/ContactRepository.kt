@@ -6,7 +6,9 @@ import com.example.listwithanimation.helpers.SharePreferences
 import com.example.listwithanimation.helpers.SharePreferences.set
 import com.example.listwithanimation.models.ContactModel
 import com.example.listwithanimation.models.LogModel
+import com.example.listwithanimation.utils.ListUtil
 import com.google.gson.Gson
+import kotlinx.coroutines.runBlocking
 
 class ContactRepository {
 
@@ -20,10 +22,10 @@ class ContactRepository {
 
 
     fun getAllContact(context: Context): List<ContactModel> {
-        return retrievePhoneContact(context)
+        return ListUtil.addLabelSection(retrievePhoneContact(context).toMutableList())
     }
 
-    fun retrievePhoneContact(context: Context): List<ContactModel> {
+    private fun retrievePhoneContact(context: Context): List<ContactModel> {
         val cr = context.contentResolver
         val lst: List<ContactModel> = ContactManager.queryContact(cr).first.distinctBy { it.id }
         val sharePref = SharePreferences.defaultPrefs(context)

@@ -27,12 +27,12 @@ class ContactViewModels: ViewModel() {
     fun fetchLog(context: Context) {
         val sharePref = SharePreferences.defaultPrefs(context)
         val loggingList = sharePref["dataLog", ""]
-            if (Gson().fromJson(loggingList, Array<LogModel>::class.java) == null) {
-                _listLog.postValue(listOf())
-            } else {
-                _listLog.postValue(
-                    Gson().fromJson(loggingList, Array<LogModel>::class.java).toList()
-                )
-            }
+        if (Gson().fromJson(loggingList, Array<LogModel>::class.java) == null) {
+            _listLog.postValue(listOf())
+        } else {
+            _listLog.postValue(
+                Gson().fromJson(loggingList, Array<LogModel>::class.java).toList()
+            )
+        }
     }
 }

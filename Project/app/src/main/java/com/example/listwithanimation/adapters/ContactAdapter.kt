@@ -53,10 +53,10 @@ class ContactAdapter : BaseAdapter<ContactModel>() {
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is SectionLayoutViewHolder -> {
-                (holder as SectionLayoutViewHolder).bind(getDataSource()[position])
+                holder.bind(getDataSource()[position])
             }
             is ContactLayoutViewHolder -> {
-                (holder as ContactLayoutViewHolder).bind(getDataSource()[position])
+                holder.bind(getDataSource()[position])
             }
         }
 
@@ -103,23 +103,6 @@ class ContactAdapter : BaseAdapter<ContactModel>() {
 
     fun configRecyclerView(rv: RecyclerView) {
         setLinearLayoutManager(rv)
-    }
-
-    fun addAllItem(lst: List<ContactModel>) {
-        setListImmediately(lst)
-    }
-
-    fun removeItem(position: Int) {
-        removeOne(position)
-    }
-
-    fun addItem(position: Int, item: ContactModel) {
-        addOne(position, item)
-    }
-
-    fun moveItem(startPosition: Int, endPosition: Int) {
-        moveOne(startPosition, endPosition)
-
     }
 
     fun submitList(newList: List<ContactModel>) {
