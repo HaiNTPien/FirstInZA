@@ -8,6 +8,7 @@ class ListUtil {
         private fun String.onlyLetters() = all { it.isLetter() }
 
         fun addLabelSection(lst: MutableList<ContactModel>): List<ContactModel> {
+            lst.sortBy { it.displayName }
             var previousLabel = ""
             var countSpecialName = 0
             for (i in lst.size - 1 downTo 0) {

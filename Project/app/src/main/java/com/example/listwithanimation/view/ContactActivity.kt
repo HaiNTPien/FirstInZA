@@ -19,6 +19,8 @@ import com.example.listwithanimation.R
 import com.example.listwithanimation.SyncService
 import com.example.listwithanimation.adapters.ViewPagerAdapter
 import com.example.listwithanimation.databinding.ActivityContactBinding
+import com.example.listwithanimation.utils.REQUEST_READ_CONTACTS_PERMISSIONS
+import com.example.listwithanimation.utils.REQUEST_SERVICE_READ_AND_WRITE_CONTACTS_PERMISSIONS
 import com.example.listwithanimation.viewmodels.ContactViewModels
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
@@ -30,20 +32,23 @@ class ContactActivity : AppCompatActivity(){
     private var needUpdate = false
     private lateinit var navigation : BottomNavigationView
     private var activityInForeground = true
-    private val requestReadContactsPermissions = 100
-    private val requestServiceReadAndWriteContactsPermissions = 101
     private val account = Account(APP_ACCOUNT_NAME, APP_ACCOUNT_TYPE)
     lateinit var viewModel : ContactViewModels
     private var broadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent != null) {
-                if (intent.hasExtra("message")) {
-                    if(activityInForeground) {
-                        if (context != null) {
-                            (viewPagerAdapter.getItem(0) as ContactFragment).updateContactList(this@ContactActivity)
+            if (intent != null && intent.hasExtra("message")) {
+                when(intent.getStringExtra("message")) {
+                    "needUpdate" -> {
+                        if(activityInForeground) {
+                            if (context != null) {
+                                (viewPagerAdapter.getItem(0) as ContactFragment).updateContactList(this@ContactActivity)
+                            }
+                        }else {
+                            needUpdate = true
                         }
-                    }else {
-                        needUpdate = true
+                    }
+                    else -> {
+
                     }
                 }
             }
@@ -96,12 +101,12 @@ class ContactActivity : AppCompatActivity(){
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         when(requestCode) {
-            requestReadContactsPermissions -> {
+            REQUEST_READ_CONTACTS_PERMISSIONS -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     (viewPagerAdapter.getItem(0) as ContactFragment).updateContactList(this@ContactActivity)
                 }
             }
-            requestServiceReadAndWriteContactsPermissions -> {
+            REQUEST_SERVICE_READ_AND_WRITE_CONTACTS_PERMISSIONS -> {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     setViewPagerAdapter()
                     createAccount()
@@ -127,7 +132,7 @@ class ContactActivity : AppCompatActivity(){
             ) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(
                 arrayOf(Manifest.permission.WRITE_CONTACTS, Manifest.permission.READ_CONTACTS),
-                requestServiceReadAndWriteContactsPermissions
+                REQUEST_SERVICE_READ_AND_WRITE_CONTACTS_PERMISSIONS
             )
         } else {
             setViewPagerAdapter()
@@ -176,5 +181,4 @@ class ContactActivity : AppCompatActivity(){
         binding.viewPager.adapter?.notifyDataSetChanged()
         navigation.setOnItemSelectedListener(onNavigationItemSelectedListener)
     }
-
 }
