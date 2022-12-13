@@ -39,6 +39,7 @@ class ContactActivity : AppCompatActivity(){
             if (intent != null && intent.hasExtra("message")) {
                 when(intent.getStringExtra("message")) {
                     "needUpdate" -> {
+                        viewModel.notifyContactChanged(this@ContactActivity)
                         if(activityInForeground) {
                             if (context != null) {
                                 (viewPagerAdapter.getItem(0) as ContactFragment).updateContactList(this@ContactActivity)
