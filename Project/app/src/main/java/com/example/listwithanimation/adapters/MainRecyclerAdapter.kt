@@ -2,10 +2,8 @@ package com.example.listwithanimation.adapters
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.example.listwithanimation.R
 import com.example.listwithanimation.databinding.ContentItemLayoutBinding
 import com.example.listwithanimation.databinding.TitleLayoutBinding
 import com.example.listwithanimation.models.ItemModel
@@ -17,20 +15,14 @@ class MainRecyclerAdapter : BaseAdapter<ItemModel>() {
     override fun onCreateViewHolder(p0: ViewGroup, p1: Int): ViewHolder {
         return when (p1) {
             0 -> {
-                val titleLayoutBinding: TitleLayoutBinding = DataBindingUtil.inflate(
-                    LayoutInflater.from(p0.context), R.layout.title_layout, p0, false
+                val titleLayoutBinding: TitleLayoutBinding = TitleLayoutBinding.inflate(
+                    LayoutInflater.from(p0.context), p0, false
                 )
                 TitleLayoutViewHolder(titleLayoutBinding)
             }
-            1 -> {
-                val contentItemLayoutBinding: ContentItemLayoutBinding = DataBindingUtil.inflate(
-                    LayoutInflater.from(p0.context), R.layout.content_item_layout, p0, false
-                )
-                ContentLayoutViewHolder(contentItemLayoutBinding)
-            }
             else -> {
-                val contentItemLayoutBinding: ContentItemLayoutBinding = DataBindingUtil.inflate(
-                    LayoutInflater.from(p0.context), R.layout.content_item_layout, p0, false
+                val contentItemLayoutBinding: ContentItemLayoutBinding = ContentItemLayoutBinding.inflate(
+                    LayoutInflater.from(p0.context), p0, false
                 )
                 ContentLayoutViewHolder(contentItemLayoutBinding)
             }

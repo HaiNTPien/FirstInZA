@@ -1,16 +1,11 @@
 package com.example.listwithanimation.adapters
 
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.example.listwithanimation.R
 import com.example.listwithanimation.databinding.ContactItemLayoutBinding
-import com.example.listwithanimation.databinding.ContentItemLayoutBinding
 import com.example.listwithanimation.databinding.SectionItemLayoutBinding
 import com.example.listwithanimation.models.ContactModel
-import com.example.listwithanimation.models.ItemModel
 import com.example.listwithanimation.models.PhoneInContactModel
 
 class ContactAdapter : BaseAdapter<ContactModel>() {
@@ -28,22 +23,15 @@ class ContactAdapter : BaseAdapter<ContactModel>() {
         when (viewType) {
             0 -> {
 
-                val sectionItemLayoutBinding: SectionItemLayoutBinding = DataBindingUtil.inflate(
-                    LayoutInflater.from(parent.context), R.layout.section_item_layout, parent, false
+                val sectionItemLayoutBinding: SectionItemLayoutBinding = SectionItemLayoutBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false
                 )
                 return SectionLayoutViewHolder(sectionItemLayoutBinding)
             }
-            1 -> {
-
-                val contactItemLayoutBinding: ContactItemLayoutBinding = DataBindingUtil.inflate(
-                    LayoutInflater.from(parent.context), R.layout.contact_item_layout, parent, false
-                )
-                return ContactLayoutViewHolder(contactItemLayoutBinding)
-            }
             else -> {
 
-                val contactItemLayoutBinding: ContactItemLayoutBinding = DataBindingUtil.inflate(
-                    LayoutInflater.from(parent.context), R.layout.contact_item_layout, parent, false
+                val contactItemLayoutBinding: ContactItemLayoutBinding = ContactItemLayoutBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false
                 )
                 return ContactLayoutViewHolder(contactItemLayoutBinding)
             }

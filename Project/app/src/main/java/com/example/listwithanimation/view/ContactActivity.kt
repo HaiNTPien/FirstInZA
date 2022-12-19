@@ -10,7 +10,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.viewpager.widget.ViewPager
 import com.example.listwithanimation.utils.APP_ACCOUNT_NAME
@@ -48,16 +47,14 @@ class ContactActivity : AppCompatActivity(){
                             needUpdate = true
                         }
                     }
-                    else -> {
-
-                    }
                 }
             }
         }
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_contact)
+        binding = ActivityContactBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         viewModel = ViewModelProvider(this)[ContactViewModels::class.java]
         navigation = binding.navigation
         askForPermissions()

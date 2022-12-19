@@ -7,7 +7,6 @@ import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.listwithanimation.R
 import com.example.listwithanimation.adapters.MainRecyclerAdapter
@@ -24,7 +23,8 @@ class MainActivity : AppCompatActivity() {
     private var inRemoveMode: Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         initList()
         initFAB()
         initItemBehavior()
